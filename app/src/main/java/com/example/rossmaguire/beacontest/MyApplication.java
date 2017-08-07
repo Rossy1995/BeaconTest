@@ -6,17 +6,22 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
 public class MyApplication extends Application {
 
     private BeaconManager beaconManager;
+    private String StartTime;
+    private String StopTime;
 
     @Override
     public void onCreate() {
@@ -26,14 +31,15 @@ public class MyApplication extends Application {
         final Region entrance = new Region("entrance", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
 
         beaconManager = new BeaconManager(getApplicationContext());
-        beaconManager.setBackgroundScanPeriod(10000, 10000);
+        beaconManager.setBackgroundScanPeriod(25000, 30000);
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
                 if (region.getIdentifier().equals("dev"))
                 {
+                    StartTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
                     showNotification(
-                            "Entered dev floor", "Welcome to GC!");
+                            "Entered dev floor at " + StartTime, "Welcome to GC!");
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
@@ -45,8 +51,9 @@ public class MyApplication extends Application {
             public void onExitedRegion(Region region) {
                 if (region.getIdentifier().equals("dev"))
                 {
+                    StopTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
                     showNotification(
-                            "Exited dev floor", "Goodbye!");
+                            "Exited dev floor at " + StopTime, "Goodbye!");
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
@@ -81,4 +88,5 @@ public class MyApplication extends Application {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notification);
     }
+
 }
