@@ -12,11 +12,11 @@ public class DBConnection extends SQLiteOpenHelper{
     public static final String USERS_TABLE_NAME = "Users";
     public static final String TIMESHEETS_TABLE_NAME = "Timesheets";
 
-    public static final String U_COL_1 = "User_ID";
+    /*public static final String U_COL_1 = "User_ID";
     public static final String U_COL_2 = "Username";
-    public static final String U_COL_3 = "Password";
+    public static final String U_COL_3 = "Password";*/
 
-    public static final String D_COL_1 = "_id";
+    public static final String T_COL_1 = "_id";
     public static final String T_COL_2 = "CHECK_IN_TIME";
     public static final String T_COL_3 = "CHECK_OUT_TIME";
 
@@ -26,11 +26,11 @@ public class DBConnection extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String DATABASE_CREATE = "CREATE TABLE " + USERS_TABLE_NAME + " (User_ID INTEGER PRIMARY KEY AUTOINCREMENT,USERNAME TEXT NOT NULL,PASSWORD TEXT NOT NULL);";
-        db.execSQL(DATABASE_CREATE);
+        String DATABASE_CREATE_USERS = "CREATE TABLE " + USERS_TABLE_NAME + "(User_ID INTEGER PRIMARY KEY AUTOINCREMENT,Username TEXT NOT NULL,Password TEXT NOT NULL);";
+        db.execSQL(DATABASE_CREATE_USERS);
         db.execSQL("INSERT INTO Users (Username, Password) VALUES('user', 'pass')");
-        String DATABASE_CREATE_DEVICES = "CREATE TABLE " + TIMESHEETS_TABLE_NAME + " (_id INTEGER PRIMARY KEY AUTOINCREMENT,CHECK_IN_TIME TIME,CHECK_OUT_TIME TIME);";
-        db.execSQL(DATABASE_CREATE_DEVICES);
+        String DATABASE_CREATE_TIMESHEETS = "CREATE TABLE Timesheets (_id INTEGER PRIMARY KEY AUTOINCREMENT,CHECK_IN_TIME TIME,CHECK_OUT_TIME TIME);";
+        db.execSQL(DATABASE_CREATE_TIMESHEETS);
     }
 
     @Override
