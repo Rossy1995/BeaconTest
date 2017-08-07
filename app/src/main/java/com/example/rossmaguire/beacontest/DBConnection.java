@@ -29,7 +29,7 @@ public class DBConnection extends SQLiteOpenHelper{
         String DATABASE_CREATE_USERS = "CREATE TABLE " + USERS_TABLE_NAME + "(User_ID INTEGER PRIMARY KEY AUTOINCREMENT,Username TEXT NOT NULL,Password TEXT NOT NULL);";
         db.execSQL(DATABASE_CREATE_USERS);
         db.execSQL("INSERT INTO Users (Username, Password) VALUES('user', 'pass')");
-        String DATABASE_CREATE_TIMESHEETS = "CREATE TABLE Timesheets (_id INTEGER PRIMARY KEY AUTOINCREMENT,CHECK_IN_TIME TIME,CHECK_OUT_TIME TIME);";
+        String DATABASE_CREATE_TIMESHEETS = "CREATE TABLE Timesheets (_id INTEGER PRIMARY KEY AUTOINCREMENT,CHECK_IN_TIME DATETIME,CHECK_OUT_TIME DATETIME);";
         db.execSQL(DATABASE_CREATE_TIMESHEETS);
     }
 
@@ -40,11 +40,10 @@ public class DBConnection extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    public boolean insertData (String checkInTime, String checkOutTime){
+    public boolean insertCheckInTime (String checkInTime){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(T_COL_2, checkInTime);
-        contentValues.put(T_COL_3, checkOutTime);
         Long result  = db.insert(TIMESHEETS_TABLE_NAME, null, contentValues); // inserts parsed values into TABLE_NAME
         if (result == -1){
             return false;

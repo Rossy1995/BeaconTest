@@ -19,6 +19,8 @@ public class LoginActivity extends AppCompatActivity {
     EditText txtPassword;
     Button btnLogin;
     DBConnection myDbConnection;
+    String username;
+    String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +45,11 @@ public class LoginActivity extends AppCompatActivity {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(txtUsername.getWindowToken(), 0);
                 imm.hideSoftInputFromWindow(txtPassword.getWindowToken(), 0);
-                String username = txtUsername.getText().toString();
-                String password = txtPassword.getText().toString();
+                username = txtUsername.getText().toString();
+                password = txtPassword.getText().toString();
                 if (username.length() > 0 && password.length() > 0) {
                     try {
-
                         if (dbAdapter.Login(username, password)) {
-                            //prefs.edit().putString("username", username).commit();
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         } else {
                             Toast.makeText(LoginActivity.this,
@@ -68,5 +68,9 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+    public String getUsername()
+    {
+        return username;
     }
 }
