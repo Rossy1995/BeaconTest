@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.SystemClock;
 
 import com.estimote.sdk.Beacon;
@@ -22,10 +23,15 @@ public class MyApplication extends Application {
     private BeaconManager beaconManager;
     private String StartTime;
     private String StopTime;
+    private String user;
+    private DBConnection dbConnection;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
+        user = prefs.getString("username", "UNKNOWN");
 
         final Region dev = new Region("dev", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
         final Region entrance = new Region("entrance", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
@@ -38,8 +44,9 @@ public class MyApplication extends Application {
                 if (region.getIdentifier().equals("dev"))
                 {
                     StartTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
+                    dbConnection.insertData(StartTime, StopTime);
                     showNotification(
-                            "Entered dev floor at " + StartTime, "Welcome to GC!");
+                            "Entered dev floor at " + StartTime, "Welcome to GC " + user);
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
