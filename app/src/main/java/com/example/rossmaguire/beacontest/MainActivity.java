@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private Timestamp timestamp;
     private LoginActivity login = new LoginActivity();
     private String user = login.getUsername();
-    private DBConnection dbConnection;
+    private DBConnection dbConnection = new DBConnection(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
                 if (region.getIdentifier().equals("dev"))
                 {
                     timestamp = new Timestamp(System.currentTimeMillis());
-                    //dbConnection.insertCheckInTime(timestamp);
+                    dbConnection.insertCheckInTime(timestamp);
+                    dbConnection.close();
                     showNotification(
                             "Entered dev floor at " + sdf.format(timestamp), "Welcome to GC " + user);
                 }
