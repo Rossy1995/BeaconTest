@@ -6,15 +6,17 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 import com.estimote.sdk.SystemRequirementsChecker;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -24,17 +26,14 @@ public class MainActivity extends AppCompatActivity {
 
     private BeaconManager beaconManager;
     private Region region;
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
     private Timestamp timestamp;
-    private LoginActivity login = new LoginActivity();
-    private String user = login.getUsername();
     private DBConnection dbConnection = new DBConnection(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         final Region dev = new Region("dev", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
         final Region entrance = new Region("entrance", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
 
@@ -45,8 +44,6 @@ public class MainActivity extends AppCompatActivity {
             public void onServiceReady() {
                 beaconManager.startMonitoring(dev);
                 beaconManager.startMonitoring(entrance);
-
-
             }
         });
 
@@ -55,30 +52,26 @@ public class MainActivity extends AppCompatActivity {
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                if (region.getIdentifier().equals("dev"))
-                {
+                if (region.getIdentifier().equals("dev")) {
                     timestamp = new Timestamp(System.currentTimeMillis());
-                    dbConnection.insertCheckInTime(timestamp);
-                    dbConnection.close();
+                    dbConnection.insertCheckInTime();
                     showNotification(
-                            "Entered dev floor at " + sdf.format(timestamp), "Welcome to GC " + user);
-                }
-                else if (region.getIdentifier().equals("entrance"))
-                {
+                            "Entered dev floor at " + sdf.format(timestamp), "Welcome to GC!");
+
+
+                } else if (region.getIdentifier().equals("entrance")) {
                     showNotification(
                             "Entered entrance", "Welcome to GC!");
                 }
             }
+
             @Override
             public void onExitedRegion(Region region) {
-                if (region.getIdentifier().equals("dev"))
-                {
+                if (region.getIdentifier().equals("dev")) {
                     timestamp = new Timestamp(System.currentTimeMillis());
                     showNotification(
                             "Exited dev floor at " + sdf.format(timestamp), "Goodbye!");
-                }
-                else if (region.getIdentifier().equals("entrance"))
-                {
+                } else if (region.getIdentifier().equals("entrance")) {
                     showNotification(
                             "Exited entrance", "Goodbye!");
                 }

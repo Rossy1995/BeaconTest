@@ -27,8 +27,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        final SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
-
         txtUsername = (EditText) findViewById(R.id.username);
         txtPassword = (EditText) findViewById(R.id.password);
         btnLogin = (Button) findViewById(R.id.login);
@@ -68,9 +66,5 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-    public String getUsername()
-    {
-        return username;
     }
 }
