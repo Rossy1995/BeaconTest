@@ -5,6 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 public class DBConnection extends SQLiteOpenHelper{
 
@@ -16,9 +20,11 @@ public class DBConnection extends SQLiteOpenHelper{
     public static final String U_COL_2 = "Username";
     public static final String U_COL_3 = "Password";*/
 
-    public static final String T_COL_1 = "_id";
-    public static final String T_COL_2 = "CHECK_IN_TIME";
-    public static final String T_COL_3 = "CHECK_OUT_TIME";
+    public static final String T_COL_1 = "Timesheet_id";
+    public static final String T_COL_2 = "Check_In_Time";
+    public static final String T_COL_3 = "Check_Out_Time";
+
+    public final SimpleDateFormat parser = new SimpleDateFormat("HH:mm:ss");
 
     public DBConnection(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -29,7 +35,7 @@ public class DBConnection extends SQLiteOpenHelper{
         String DATABASE_CREATE_USERS = "CREATE TABLE " + USERS_TABLE_NAME + "(User_ID INTEGER PRIMARY KEY AUTOINCREMENT,Username TEXT NOT NULL,Password TEXT NOT NULL);";
         db.execSQL(DATABASE_CREATE_USERS);
         db.execSQL("INSERT INTO Users (Username, Password) VALUES('user', 'pass')");
-        String DATABASE_CREATE_TIMESHEETS = "CREATE TABLE Timesheets (_id INTEGER PRIMARY KEY AUTOINCREMENT,CHECK_IN_TIME DATETIME,CHECK_OUT_TIME DATETIME);";
+        String DATABASE_CREATE_TIMESHEETS = "CREATE TABLE Timesheets (Timesheet_id INTEGER PRIMARY KEY AUTOINCREMENT,Check_In_Time DATETIME,Check_Out_Time DATETIME);";
         db.execSQL(DATABASE_CREATE_TIMESHEETS);
     }
 
@@ -40,10 +46,10 @@ public class DBConnection extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    public boolean insertCheckInTime (String checkInTime){
+    public boolean insertCheckInTime (Timestamp checkInTime){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(T_COL_2, checkInTime);
+        contentValues.put(T_COL_2, parser.format(checkInTime));
         Long result  = db.insert(TIMESHEETS_TABLE_NAME, null, contentValues); // inserts parsed values into TABLE_NAME
         if (result == -1){
             return false;

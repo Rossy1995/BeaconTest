@@ -14,8 +14,9 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 import com.estimote.sdk.SystemRequirementsChecker;
 
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,10 +24,11 @@ public class MainActivity extends AppCompatActivity {
 
     private BeaconManager beaconManager;
     private Region region;
-    private String StartTime;
-    private String StopTime;
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    private Timestamp timestamp;
     private LoginActivity login = new LoginActivity();
     private String user = login.getUsername();
+    private DBConnection dbConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +57,10 @@ public class MainActivity extends AppCompatActivity {
             public void onEnteredRegion(Region region, List<Beacon> list) {
                 if (region.getIdentifier().equals("dev"))
                 {
-                    StartTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
-                    //dbConnection.insertCheckInTime(StartTime);
+                    timestamp = new Timestamp(System.currentTimeMillis());
+                    //dbConnection.insertCheckInTime(timestamp);
                     showNotification(
-                            "Entered dev floor at " + StartTime, "Welcome to GC " + user);
+                            "Entered dev floor at " + sdf.format(timestamp), "Welcome to GC " + user);
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
@@ -70,9 +72,9 @@ public class MainActivity extends AppCompatActivity {
             public void onExitedRegion(Region region) {
                 if (region.getIdentifier().equals("dev"))
                 {
-                    StopTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
+                    timestamp = new Timestamp(System.currentTimeMillis());
                     showNotification(
-                            "Exited dev floor at " + StopTime, "Goodbye!");
+                            "Exited dev floor at " + sdf.format(timestamp), "Goodbye!");
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
