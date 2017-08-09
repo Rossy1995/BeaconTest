@@ -17,6 +17,10 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 import com.estimote.sdk.SystemRequirementsChecker;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -28,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private Region region;
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
     private Timestamp timestamp;
-    private DBConnection dbConnection = new DBConnection(this);
+    private DBConnection dbConnection = new DBConnection();
+    private Connection con = dbConnection.CONN();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,10 +59,15 @@ public class MainActivity extends AppCompatActivity {
             public void onEnteredRegion(Region region, List<Beacon> list) {
                 if (region.getIdentifier().equals("dev")) {
                     timestamp = new Timestamp(System.currentTimeMillis());
-                    dbConnection.insertCheckInTime();
                     showNotification(
                             "Entered dev floor at " + sdf.format(timestamp), "Welcome to GC!");
-
+                    try {
+                        String query = "INSERT INTO Timesheets (Check_In_Time) VALUES ('" + timestamp + "');";
+                        Statement statement = con.createStatement();
+                        ResultSet rs = statement.executeQuery(query);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
 
                 } else if (region.getIdentifier().equals("entrance")) {
                     showNotification(
