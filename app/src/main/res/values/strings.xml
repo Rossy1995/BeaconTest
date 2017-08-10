@@ -1,3 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Beacon Test</string>
+    <string name="welcome">Welcome</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_logout">Logout</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
 </resources>
