@@ -6,4 +6,13 @@
     android:layout_height="match_parent"
     tools:context="com.example.rossmaguire.beacontest.MainActivity">
 
+    <TextView
+        android:id="@+id/userName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:gravity="center_horizontal"
+        android:text="placeholder"
+        android:textSize="30sp" />
 </RelativeLayout>
