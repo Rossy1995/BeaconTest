@@ -1,6 +1,7 @@
 package com.example.rossmaguire.beacontest;
 
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -32,7 +33,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText username, password;
     private String user, pass;
-
+    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     public static final String USER_NAME = "USERNAME";
 
     @Override
@@ -42,6 +43,8 @@ public class LoginActivity extends AppCompatActivity {
 
         username = (EditText) findViewById(R.id.userName);
         password = (EditText) findViewById(R.id.passWord);
+
+        mBluetoothAdapter.enable();
     }
 
     public void checkLogin(View view) {

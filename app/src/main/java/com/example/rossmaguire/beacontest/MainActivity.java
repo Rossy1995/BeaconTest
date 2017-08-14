@@ -3,6 +3,7 @@ package com.example.rossmaguire.beacontest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 
@@ -51,12 +52,10 @@ import java.util.jar.Attributes;
 public class MainActivity extends AppCompatActivity {
 
     private BeaconManager beaconManager;
+    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private String checkIn;
-    private Button btnCheckIn;
-    private SimpleDateFormat sdf = new SimpleDateFormat("YYYY-mm-dd HH:mm:ss");
     private InputStream is = null;
     private String result = null;
-    private String line = null;
     private String inOrOut;
 
     @Override
@@ -65,11 +64,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Intent intent = getIntent();
-        String username = intent.getStringExtra(LoginActivity.USER_NAME);
+        final String user = intent.getStringExtra(LoginActivity.USER_NAME);
 
         TextView userName = (TextView) findViewById(R.id.userName);
 
-        userName.setText("Welcome " + username);
+        userName.setText("Welcome " + user);
 
         final Region dev = new Region("dev", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
         final Region entrance = new Region("entrance", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
@@ -86,16 +85,16 @@ public class MainActivity extends AppCompatActivity {
                     showNotification(
                             "Entered dev floor", "Welcome to GC!");
                     inOrOut = "In";
-                    checkIn = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
-                    insertToDatabase(checkIn, inOrOut);
+                    checkIn = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                    insertToDatabase(user, checkIn, inOrOut);
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
                     showNotification(
                             "Entered entrance", "Welcome to GC!");
                     inOrOut = "In";
-                    checkIn = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
-                    insertToDatabase(checkIn, inOrOut);
+                    checkIn = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                    insertToDatabase(user, checkIn, inOrOut);
                 }
             }
             @Override
@@ -142,15 +141,17 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(1, notification);
     }
 
-    private void insertToDatabase(final String checkIn, final String inOrOut)
+    private void insertToDatabase(final String user, final String checkIn, final String inOrOut)
     {
         class SendPostReqAsyncTask extends AsyncTask<String, Void, String>{
             @Override
             protected String doInBackground(String... params){
-                String paramCheckIn = params[0];
-                String paramInOrOut = params[1];
+                String user = params[0];
+                String checkIn = params[1];
+                String inOrOut = params[2];
 
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                nameValuePairs.add(new BasicNameValuePair("username", user));
                 nameValuePairs.add(new BasicNameValuePair("check_in_time", checkIn));
                 nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
 
@@ -190,9 +191,10 @@ public class MainActivity extends AppCompatActivity {
                 }else if(s.equalsIgnoreCase("failure")) {
                     Toast.makeText(getApplicationContext(), "Insert wasn't successful!", Toast.LENGTH_LONG).show();
                 }
+                mBluetoothAdapter.disable();
             }
         }
         SendPostReqAsyncTask sendPostReqAsyncTask = new SendPostReqAsyncTask();
-        sendPostReqAsyncTask.execute(checkIn, inOrOut);
+        sendPostReqAsyncTask.execute(user, checkIn, inOrOut);
     }
 }
