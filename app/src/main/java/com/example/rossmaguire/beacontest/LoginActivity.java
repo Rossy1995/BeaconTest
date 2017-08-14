@@ -37,7 +37,6 @@ public class LoginActivity extends AppCompatActivity {
     private final static int REQUEST_ENABLE_BT = 1;
     private EditText username, password;
     private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private final WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
     public static final String USER_NAME = "USERNAME";
     private String line;
 
@@ -49,33 +48,34 @@ public class LoginActivity extends AppCompatActivity {
         username = findViewById(R.id.userName);
         password = findViewById(R.id.passWord);
 
-        if (!wifi.isWifiEnabled()) {
-            checkEnableWiFi();
-        }
+        checkEnableWiFi();
         checkEnableBluetooth();
         checkEnableGPS();
     }
 
     private void checkEnableWiFi()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Wifi is not turned on");
-        builder.setMessage("Please turn on WiFi for this application to function properly");
-        builder.setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        wifi.setWifiEnabled(true); // true or false to activate/deactivate wifi
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Do Nothing or Whatever you want.
-                        dialog.cancel();
-                    }
-                });
-        AlertDialog alert = builder.create();
-        alert.setCanceledOnTouchOutside(false);
-        alert.show();
+        final WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if(!wifi.isWifiEnabled()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Wifi is not turned on");
+            builder.setMessage("Please turn on WiFi for this application to function properly");
+            builder.setCancelable(false)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            wifi.setWifiEnabled(true); // true or false to activate/deactivate wifi
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Do Nothing or Whatever you want.
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.setCanceledOnTouchOutside(false);
+            alert.show();
+        }
     }
 
     private void checkEnableBluetooth()

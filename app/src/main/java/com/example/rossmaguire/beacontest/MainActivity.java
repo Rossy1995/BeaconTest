@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -173,13 +174,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(String result){
-                String s = result.trim();
-                if(s.equalsIgnoreCase("success")){
-                    Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
-                }else if(s.equalsIgnoreCase("failure")) {
-                    Toast.makeText(getApplicationContext(), "Insert wasn't successful!", Toast.LENGTH_LONG).show();
-                }
+                Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
                 mBluetoothAdapter.disable();
+
             }
         }
         SendPostReqAsyncTask sendPostReqAsyncTask = new SendPostReqAsyncTask();
