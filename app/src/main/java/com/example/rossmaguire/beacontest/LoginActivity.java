@@ -2,8 +2,15 @@ package com.example.rossmaguire.beacontest;
 
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.location.LocationManager;
+import android.net.wifi.WifiManager;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -27,8 +34,10 @@ import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private final static int REQUEST_ENABLE_BT = 1;
     private EditText username, password;
     private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private final WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
     public static final String USER_NAME = "USERNAME";
     private String line;
 
@@ -40,10 +49,68 @@ public class LoginActivity extends AppCompatActivity {
         username = findViewById(R.id.userName);
         password = findViewById(R.id.passWord);
 
-        mBluetoothAdapter.enable();
+        if (!wifi.isWifiEnabled()) {
+            checkEnableWiFi();
+        }
+        checkEnableBluetooth();
+        checkEnableGPS();
     }
 
-    public void checkLogin() {
+    private void checkEnableWiFi()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Wifi is not turned on");
+        builder.setMessage("Please turn on WiFi for this application to function properly");
+        builder.setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        wifi.setWifiEnabled(true); // true or false to activate/deactivate wifi
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Do Nothing or Whatever you want.
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.setCanceledOnTouchOutside(false);
+        alert.show();
+    }
+
+    private void checkEnableBluetooth()
+    {
+        if(!mBluetoothAdapter.isEnabled())
+        {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+    }
+    private void checkEnableGPS(){
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if(!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Location Services Are Not Active");
+            builder.setMessage("Please enable Location Services and GPS via settings");
+            builder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(intent);
+                }
+            })
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+                public void onClick(DialogInterface dialogInterface, int i){
+                    dialogInterface.cancel();
+                }
+            });
+            AlertDialog alert = builder.create();
+            alert.setCanceledOnTouchOutside(false);
+            alert.show();
+        }
+
+    }
+
+    public void checkLogin(View view) {
 
         // Get text from email and password field
         String user = username.getText().toString();
