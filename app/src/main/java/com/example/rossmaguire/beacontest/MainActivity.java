@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private InputStream is = null;
     private String result = null;
     private String line = null;
-    private int code;
+    private String inOrOut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         userName.setText("Welcome " + username);
 
-        /*final Region dev = new Region("dev", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
+        final Region dev = new Region("dev", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
         final Region entrance = new Region("entrance", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
 
         beaconManager = new BeaconManager(getApplicationContext());
@@ -85,11 +85,17 @@ public class MainActivity extends AppCompatActivity {
                 {
                     showNotification(
                             "Entered dev floor", "Welcome to GC!");
+                    inOrOut = "In";
+                    checkIn = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+                    insertToDatabase(checkIn, inOrOut);
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
                     showNotification(
                             "Entered entrance", "Welcome to GC!");
+                    inOrOut = "In";
+                    checkIn = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+                    insertToDatabase(checkIn, inOrOut);
                 }
             }
             @Override
@@ -98,11 +104,13 @@ public class MainActivity extends AppCompatActivity {
                 {
                     showNotification(
                             "Exited dev floor", "Goodbye!");
+                    inOrOut = "Out";
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
                     showNotification(
                             "Exited entrance", "Goodbye!");
+                    inOrOut = "Out";
                 }
             }
         });
@@ -132,23 +140,19 @@ public class MainActivity extends AppCompatActivity {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notification);
-    }*/
     }
 
-    public void checkInTime(View view) {
-        checkIn = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
-        insertToDatabase(checkIn);
-    }
-
-    private void insertToDatabase(final String checkIn)
+    private void insertToDatabase(final String checkIn, final String inOrOut)
     {
         class SendPostReqAsyncTask extends AsyncTask<String, Void, String>{
             @Override
             protected String doInBackground(String... params){
                 String paramCheckIn = params[0];
+                String paramInOrOut = params[1];
 
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
                 nameValuePairs.add(new BasicNameValuePair("check_in_time", checkIn));
+                nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
 
                 try {
                     HttpClient httpClient = new DefaultHttpClient();
@@ -183,13 +187,12 @@ public class MainActivity extends AppCompatActivity {
                 String s = result.trim();
                 if(s.equalsIgnoreCase("success")){
                     Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
-                }else {
+                }else if(s.equalsIgnoreCase("failure")) {
                     Toast.makeText(getApplicationContext(), "Insert wasn't successful!", Toast.LENGTH_LONG).show();
                 }
             }
         }
         SendPostReqAsyncTask sendPostReqAsyncTask = new SendPostReqAsyncTask();
-        sendPostReqAsyncTask.execute(checkIn);
+        sendPostReqAsyncTask.execute(checkIn, inOrOut);
     }
 }
-

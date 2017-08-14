@@ -23,6 +23,5 @@
         android:layout_below="@+id/userName"
         android:layout_centerHorizontal="true"
         android:elevation="1dp"
-        android:text="Check In"
-        android:onClick="checkInTime"/>
+        android:text="Check In"/>
 </RelativeLayout>
