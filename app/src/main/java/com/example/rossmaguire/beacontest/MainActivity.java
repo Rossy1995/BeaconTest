@@ -9,11 +9,7 @@ import android.content.Intent;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,41 +17,32 @@ import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
-import net.sourceforge.jtds.jdbc.DateTime;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.sql.Date;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
-import java.util.jar.Attributes;
 
 public class MainActivity extends AppCompatActivity {
 
     private BeaconManager beaconManager;
-    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private String checkIn;
     private InputStream is = null;
     private String result = null;
+    private String line;
     private String inOrOut;
 
     @Override
@@ -66,9 +53,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         final String user = intent.getStringExtra(LoginActivity.USER_NAME);
 
-        TextView userName = (TextView) findViewById(R.id.userName);
+        TextView userName = findViewById(R.id.userName);
 
-        userName.setText("Welcome " + user);
+        userName.setText("Welcome \n" + user);
 
         final Region dev = new Region("dev", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
         final Region entrance = new Region("entrance", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
@@ -104,12 +91,16 @@ public class MainActivity extends AppCompatActivity {
                     showNotification(
                             "Exited dev floor", "Goodbye!");
                     inOrOut = "Out";
+                    checkIn = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                    insertToDatabase(user, checkIn, inOrOut);
                 }
                 else if (region.getIdentifier().equals("entrance"))
                 {
                     showNotification(
                             "Exited entrance", "Goodbye!");
                     inOrOut = "Out";
+                    checkIn = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                    insertToDatabase(user, checkIn, inOrOut);
                 }
             }
         });
@@ -123,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void showNotification(String title, String message) {
+    private void showNotification(String title, String message) {
         Intent notifyIntent = new Intent(this, MainActivity.class);
         notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivities(this, 0,
@@ -150,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 String checkIn = params[1];
                 String inOrOut = params[2];
 
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                List<NameValuePair> nameValuePairs = new ArrayList<>();
                 nameValuePairs.add(new BasicNameValuePair("username", user));
                 nameValuePairs.add(new BasicNameValuePair("check_in_time", checkIn));
                 nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
@@ -167,19 +158,16 @@ public class MainActivity extends AppCompatActivity {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
                     StringBuilder sb = new StringBuilder();
 
-                    String line = null;
                     while ((line = reader.readLine()) != null)
                     {
                         sb.append(line + "\n");
                     }
                     result = sb.toString();
                 }
-                catch (ClientProtocolException e) {
+                catch (Exception e) {
                     e.printStackTrace();
                 }
-                catch (IOException e){
-                    e.printStackTrace();
-                }
+
                 return result;
             }
 
