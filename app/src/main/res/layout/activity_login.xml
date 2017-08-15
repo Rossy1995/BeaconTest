@@ -49,6 +49,8 @@
             android:background="#5d5d5d"
             android:padding="10dp"
             android:hint="@string/hint_username"
+            android:inputType="textNoSuggestions"
+            android:imeOptions="actionNext"
             android:textSize="20sp"
             android:id="@+id/userName" />
 
@@ -63,6 +65,7 @@
             android:background="#5d5d5d"
             android:padding="10dp"
             android:inputType="textPassword"
+            android:imeOptions="actionDone"
             android:layout_marginTop="5dp"
             android:id="@+id/passWord" />
 
@@ -75,8 +78,7 @@
             android:padding="10dp"
             android:layout_marginTop="10dp"
             android:id="@+id/btnLogin"
-            android:text="@string/btn_login"
-            android:onClick="checkLogin"/>
+            android:text="@string/btn_login" />
 
         <CheckBox
             android:id="@+id/saveLoginCheckBox"
@@ -85,7 +87,6 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/btnLogin"
             android:text="@string/remember_me"
-            android:onClick="rememberMe"
             android:textColor="#FFF" />
 
     </LinearLayout>

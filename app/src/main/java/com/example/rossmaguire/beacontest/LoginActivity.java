@@ -5,9 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.location.LocationManager;
 import android.net.wifi.WifiManager;
-import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -36,7 +34,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     private final static int REQUEST_ENABLE_BT = 1;
     private EditText email, password;
@@ -59,6 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         login = findViewById(R.id.btnLogin);
+        login.setOnClickListener(this);
         email = findViewById(R.id.userName);
         password = findViewById(R.id.passWord);
         saveLoginCheckBox = findViewById(R.id.saveLoginCheckBox);
@@ -74,10 +73,9 @@ public class LoginActivity extends AppCompatActivity {
 
         checkEnableWiFi();
         checkEnableBluetooth();
-        checkEnableGPS();
     }
 
-    public void rememberMe(View view)
+    public void onClick(View view)
     {
         if (view == login)
         {
@@ -97,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                 loginPrefsEditor.commit();
             }
 
-            checkLogin(view);
+            checkLogin();
         }
     }
 
@@ -135,31 +133,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void checkEnableGPS(){
-        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if(!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Location Services Are Not Active");
-            builder.setMessage("Please enable Location Services and GPS via settings");
-            builder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
-                }
-            })
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
-                public void onClick(DialogInterface dialogInterface, int i){
-                    dialogInterface.cancel();
-                }
-            });
-            AlertDialog alert = builder.create();
-            alert.setCanceledOnTouchOutside(false);
-            alert.show();
-        }
-
-    }
-
-    public void checkLogin(View view) {
+    public void checkLogin() {
 
         // Get text from email and password field
         user = email.getText().toString();
