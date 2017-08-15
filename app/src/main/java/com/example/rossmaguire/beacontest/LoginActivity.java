@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
@@ -11,6 +12,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -35,22 +39,66 @@ import java.util.List;
 public class LoginActivity extends AppCompatActivity {
 
     private final static int REQUEST_ENABLE_BT = 1;
-    private EditText username, password;
+    private EditText email, password;
+    private CheckBox saveLoginCheckBox;
+    private Button login;
+
     private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    public static final String USER_NAME = "USERNAME";
+    public static final String EMAIL_ADDRESS = "EMAILADDRESS";
+
     private String line;
+    private String user, pass;
+
+    private SharedPreferences loginPreferences;
+    private SharedPreferences.Editor loginPrefsEditor;
+    private Boolean saveLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        username = findViewById(R.id.userName);
+        login = findViewById(R.id.btnLogin);
+        email = findViewById(R.id.userName);
         password = findViewById(R.id.passWord);
+        saveLoginCheckBox = findViewById(R.id.saveLoginCheckBox);
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        loginPrefsEditor = loginPreferences.edit();
+
+        saveLogin = loginPreferences.getBoolean("saveLogin", false);
+        if (saveLogin == true) {
+            email.setText(loginPreferences.getString("user", ""));
+            password.setText(loginPreferences.getString("pass", ""));
+            saveLoginCheckBox.setChecked(true);
+        }
 
         checkEnableWiFi();
         checkEnableBluetooth();
         checkEnableGPS();
+    }
+
+    public void rememberMe(View view)
+    {
+        if (view == login)
+        {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(email.getWindowToken(), 0);
+
+            user = email.getText().toString();
+            pass = password.getText().toString();
+
+            if (saveLoginCheckBox.isChecked()) {
+                loginPrefsEditor.putBoolean("saveLogin", true);
+                loginPrefsEditor.putString("user", user);
+                loginPrefsEditor.putString("pass", pass);
+                loginPrefsEditor.commit();
+            } else {
+                loginPrefsEditor.clear();
+                loginPrefsEditor.commit();
+            }
+
+            checkLogin(view);
+        }
     }
 
     private void checkEnableWiFi()
@@ -86,6 +134,7 @@ public class LoginActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
     }
+
     private void checkEnableGPS(){
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         if(!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
@@ -113,14 +162,14 @@ public class LoginActivity extends AppCompatActivity {
     public void checkLogin(View view) {
 
         // Get text from email and password field
-        String user = username.getText().toString();
-        String pass = password.getText().toString();
+        user = email.getText().toString();
+        pass = password.getText().toString();
 
         // Initialize  AsyncLogin() class with email and password
         login(user, pass);
     }
 
-    private void login(final String username, String password) {
+    private void login(final String email, String password) {
 
         class LoginAsync extends AsyncTask<String, Void, String>{
 
@@ -177,7 +226,7 @@ public class LoginActivity extends AppCompatActivity {
                 loadingDialog.dismiss();
                 if(s.equalsIgnoreCase("success")){
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    intent.putExtra(USER_NAME, username);
+                    intent.putExtra(EMAIL_ADDRESS, email);
                     finish();
                     startActivity(intent);
                 }else {
@@ -187,7 +236,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         LoginAsync la = new LoginAsync();
-        la.execute(username, password);
+        la.execute(email, password);
 
     }
 }

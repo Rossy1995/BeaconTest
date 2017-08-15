@@ -9,9 +9,44 @@
         android:id="@+id/userName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:layout_centerVertical="true"
-        android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
         android:text=""
         android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/userName"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:text=""
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/checkIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/check_in_time"
+        android:textSize="14sp"
+        android:layout_below="@+id/email"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/checkOut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/checkIn"
+        android:layout_below="@+id/checkIn"
+        android:layout_marginTop="25dp"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/check_out_time"
+        android:textSize="14sp" />
+
 </RelativeLayout>

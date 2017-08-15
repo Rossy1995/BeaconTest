@@ -5,12 +5,15 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,26 +43,36 @@ public class MainActivity extends AppCompatActivity {
 
     private BeaconManager beaconManager;
     private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private String checkIn;
+    private TextView userName, emailAddress, checkInTime, checkOutTime;
+    private String checkInOut;
     private InputStream is = null;
     private String result = null;
     private String line;
     private String inOrOut;
+    private String userString;
+    private String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        userName = findViewById(R.id.userName);
+        emailAddress = findViewById(R.id.email);
+        checkInTime = findViewById(R.id.checkIn);
+        checkOutTime = findViewById(R.id.checkOut);
         Intent intent = getIntent();
-        final String user = intent.getStringExtra(LoginActivity.USER_NAME);
+        final String email = intent.getStringExtra(LoginActivity.EMAIL_ADDRESS);
+        int index = email.indexOf('@');
 
-        TextView userName = findViewById(R.id.userName);
+        userString = email.substring(0, index);
+        user = userString.substring(0, 1).toUpperCase() + userString.substring(1);
 
-        userName.setText("Welcome \n" + user);
+        userName.setText("Welcome " + user);
+        emailAddress.setText(email);
 
-        final Region dev = new Region("dev", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
-        final Region entrance = new Region("entrance", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
+        final Region dev = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
+        final Region entrance = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
 
         beaconManager = new BeaconManager(getApplicationContext());
 
@@ -68,41 +81,41 @@ public class MainActivity extends AppCompatActivity {
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                if (region.getIdentifier().equals("dev"))
-                {
-                    showNotification(
-                            "Entered dev floor", "Welcome to GC!");
+                if (region.getIdentifier().equals("GC")) {
+                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
                     inOrOut = "In";
-                    checkIn = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                    insertToDatabase(user, checkIn, inOrOut);
+                    checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                    checkInTime.setText("Check in time: " + checkInOut);
+                    insertToDatabase(user, checkInOut, inOrOut);
                 }
-                else if (region.getIdentifier().equals("entrance"))
+                /*else if (region.getIdentifier().equals("entrance"))
                 {
-                    showNotification(
-                            "Entered entrance", "Welcome to GC!");
+                    showNotification("Entered entrance", "Welcome to GC!");
                     inOrOut = "In";
-                    checkIn = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                    insertToDatabase(user, checkIn, inOrOut);
-                }
+                    checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                    checkInTime.setText("Check in time: " + checkInOut);
+                    insertToDatabase(user, checkInOut, inOrOut);
+                }*/
             }
+
             @Override
             public void onExitedRegion(Region region) {
-                if (region.getIdentifier().equals("dev"))
-                {
-                    showNotification(
-                            "Exited dev floor", "Goodbye!");
+                if (region.getIdentifier().equals("GC")) {
+                    showNotification("You have exited Greenwood Campbell.", "See you soon!");
                     inOrOut = "Out";
-                    checkIn = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                    insertToDatabase(user, checkIn, inOrOut);
+                    checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                    checkOutTime.setText("Check in time: " + checkInOut);
+                    insertToDatabase(user, checkInOut, inOrOut);
                 }
-                else if (region.getIdentifier().equals("entrance"))
+                /*else if (region.getIdentifier().equals("entrance"))
                 {
-                    showNotification(
-                            "Exited entrance", "Goodbye!");
+                    showNotification("Exited entrance", "Goodbye!");
                     inOrOut = "Out";
-                    checkIn = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                    insertToDatabase(user, checkIn, inOrOut);
-                }
+                    checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                    checkOutTime.setText("Check in time: " + checkInOut);
+                    insertToDatabase(user, checkInOut, inOrOut);
+                }*/
+                mBluetoothAdapter.disable();
             }
         });
 
@@ -119,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         Intent notifyIntent = new Intent(this, MainActivity.class);
         notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivities(this, 0,
-                new Intent[] { notifyIntent }, PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent[]{notifyIntent}, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification = new Notification.Builder(this)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
@@ -133,18 +146,17 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(1, notification);
     }
 
-    private void insertToDatabase(final String user, final String checkIn, final String inOrOut)
-    {
-        class SendPostReqAsyncTask extends AsyncTask<String, Void, String>{
+    private void insertToDatabase(final String user, final String checkInOut, final String inOrOut) {
+        class SendPostReqAsyncTask extends AsyncTask<String, Void, String> {
             @Override
-            protected String doInBackground(String... params){
+            protected String doInBackground(String... params) {
                 String user = params[0];
-                String checkIn = params[1];
+                String checkInOut = params[1];
                 String inOrOut = params[2];
 
                 List<NameValuePair> nameValuePairs = new ArrayList<>();
                 nameValuePairs.add(new BasicNameValuePair("username", user));
-                nameValuePairs.add(new BasicNameValuePair("check_in_time", checkIn));
+                nameValuePairs.add(new BasicNameValuePair("check_in_time", checkInOut));
                 nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
 
                 try {
@@ -159,13 +171,11 @@ public class MainActivity extends AppCompatActivity {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
                     StringBuilder sb = new StringBuilder();
 
-                    while ((line = reader.readLine()) != null)
-                    {
+                    while ((line = reader.readLine()) != null) {
                         sb.append(line + "\n");
                     }
                     result = sb.toString();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -173,13 +183,47 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            protected void onPostExecute(String result){
+            protected void onPostExecute(String result) {
                 Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
-                mBluetoothAdapter.disable();
-
             }
         }
         SendPostReqAsyncTask sendPostReqAsyncTask = new SendPostReqAsyncTask();
-        sendPostReqAsyncTask.execute(user, checkIn, inOrOut);
+        sendPostReqAsyncTask.execute(user, checkInOut, inOrOut);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.log_out) {
+            AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+            mBuilder.setTitle("Logout")
+                    .setMessage("Are you sure you want to logout?")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
