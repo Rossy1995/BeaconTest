@@ -71,8 +71,7 @@ public class MainActivity extends AppCompatActivity {
         userName.setText("Welcome " + user);
         emailAddress.setText(email);
 
-        final Region dev = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 3640, 4061);
-        final Region entrance = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, 43349);
+        final Region gc = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), null, null);
 
         beaconManager = new BeaconManager(getApplicationContext());
 
@@ -122,8 +121,7 @@ public class MainActivity extends AppCompatActivity {
         beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
             @Override
             public void onServiceReady() {
-                beaconManager.startMonitoring(dev);
-                beaconManager.startMonitoring(entrance);
+                beaconManager.startMonitoring(gc);
             }
         });
     }
