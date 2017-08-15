@@ -51,9 +51,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private String line;
     private String user, pass;
 
-    private SharedPreferences loginPreferences;
     private SharedPreferences.Editor loginPrefsEditor;
-    private Boolean saveLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +63,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         email = findViewById(R.id.userName);
         password = findViewById(R.id.passWord);
         saveLoginCheckBox = findViewById(R.id.saveLoginCheckBox);
-        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        SharedPreferences loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
 
-        saveLogin = loginPreferences.getBoolean("saveLogin", false);
-        if (saveLogin == true) {
+        Boolean saveLogin = loginPreferences.getBoolean("saveLogin", false);
+        if (saveLogin) {
             email.setText(loginPreferences.getString("user", ""));
             password.setText(loginPreferences.getString("pass", ""));
             saveLoginCheckBox.setChecked(true);
@@ -103,9 +101,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public static boolean isInternetAvailable(Context context)
+    private static boolean isInternetAvailable(Context context)
     {
-        NetworkInfo info = (NetworkInfo) ((ConnectivityManager)
+        NetworkInfo info = ((ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
 
         if (info == null)
@@ -163,7 +161,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public void checkLogin() {
+    private void checkLogin() {
 
         // Get text from email and password field
         user = email.getText().toString();
@@ -182,6 +180,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
+                //noinspection deprecation
                 loadingDialog = ProgressDialog.show(LoginActivity.this, "Please wait", "Loading...");
             }
 

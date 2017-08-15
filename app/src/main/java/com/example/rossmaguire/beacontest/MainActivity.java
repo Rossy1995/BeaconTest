@@ -43,13 +43,13 @@ public class MainActivity extends AppCompatActivity {
 
     private BeaconManager beaconManager;
     private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private TextView userName, emailAddress, checkInTime, checkOutTime;
+    private TextView checkInTime;
+    private TextView checkOutTime;
     private String checkInOut;
     private InputStream is = null;
     private String result = null;
     private String line;
     private String inOrOut;
-    private String userString;
     private String user;
 
     @Override
@@ -57,15 +57,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        userName = findViewById(R.id.userName);
-        emailAddress = findViewById(R.id.email);
+        TextView userName = findViewById(R.id.userName);
+        TextView emailAddress = findViewById(R.id.email);
         checkInTime = findViewById(R.id.checkIn);
         checkOutTime = findViewById(R.id.checkOut);
         Intent intent = getIntent();
         final String email = intent.getStringExtra(LoginActivity.EMAIL_ADDRESS);
         int index = email.indexOf('@');
 
-        userString = email.substring(0, index);
+        String userString = email.substring(0, index);
         user = userString.substring(0, 1).toUpperCase() + userString.substring(1);
 
         userName.setText("Welcome " + user);
@@ -128,13 +128,14 @@ public class MainActivity extends AppCompatActivity {
         notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivities(this, 0,
                 new Intent[]{notifyIntent}, PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notification = new Notification.Builder(this)
+        @SuppressWarnings("deprecation") Notification notification = new Notification.Builder(this)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .build();
+        //noinspection deprecation
         notification.defaults |= Notification.DEFAULT_SOUND;
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

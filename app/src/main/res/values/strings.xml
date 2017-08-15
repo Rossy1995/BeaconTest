@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GC Attendance Tracker</string>
-    <string name="welcome">Welcome</string>
     <string name="btn_login">Login</string>
-    <string name="btn_logout">Logout</string>
     <string name="hint_username">Username</string>
     <string name="hint_password">Password</string>
-    <string name="name_username">Username</string>
-    <string name="name_password">Password</string>
     <string name="enter_details">Please enter your details</string>
     <string name="check_in_time">Check in time:</string>
     <string name="check_out_time">Check out time:</string>
