@@ -5,10 +5,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -36,6 +39,7 @@ import java.util.List;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private final static String TAG = LoginActivity.class.getSimpleName();
     private final static int REQUEST_ENABLE_BT = 1;
     private EditText email, password;
     private CheckBox saveLoginCheckBox;
@@ -96,6 +100,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
 
             checkLogin();
+        }
+    }
+
+    public static boolean isInternetAvailable(Context context)
+    {
+        NetworkInfo info = (NetworkInfo) ((ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+
+        if (info == null)
+        {
+            Log.d(TAG,"no internet connection");
+            return false;
+        }
+        else
+        {
+            if(info.isConnected())
+            {
+                Log.d(TAG," internet connection available...");
+                return true;
+            }
+            else
+            {
+                Log.d(TAG," internet connection");
+                return true;
+            }
+
         }
     }
 
@@ -196,15 +226,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             @Override
             protected void onPostExecute(String result){
-                String s = result.trim();
-                loadingDialog.dismiss();
-                if(s.equalsIgnoreCase("success")){
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    intent.putExtra(EMAIL_ADDRESS, email);
-                    finish();
-                    startActivity(intent);
-                }else {
-                    Toast.makeText(getApplicationContext(), "Invalid User Name or Password", Toast.LENGTH_LONG).show();
+                if (isInternetAvailable(LoginActivity.this)) {
+                    String s = result.trim();
+                    loadingDialog.dismiss();
+                    if (s.equalsIgnoreCase("success")) {
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        intent.putExtra(EMAIL_ADDRESS, email);
+                        finish();
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Invalid User Name or Password", Toast.LENGTH_LONG).show();
+                    }
+                }
+                else{
+                    loadingDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), "No Internet Connection", Toast.LENGTH_SHORT).show();
                 }
             }
         }
