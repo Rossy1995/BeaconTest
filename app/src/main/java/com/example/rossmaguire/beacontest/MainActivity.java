@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         userName.setText("Welcome " + user);
         emailAddress.setText(email);
 
-        final Region gc = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), null, null);
+        final Region gc = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, null);
 
         beaconManager = new BeaconManager(getApplicationContext());
 
@@ -80,14 +80,13 @@ public class MainActivity extends AppCompatActivity {
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                if (region.getIdentifier().equals("GC")) {
-                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
-                    inOrOut = "In";
-                    checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                    checkInTime.setText("Check in time: " + checkInOut);
-                    insertToDatabase(user, checkInOut, inOrOut);
-                }
-                /*else if (region.getIdentifier().equals("entrance"))
+                showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                inOrOut = "In";
+                checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                checkInTime.setText("Check in time: " + checkInOut);
+                insertToDatabase(user, checkInOut, inOrOut);
+            }
+            /*else if (region.getIdentifier().equals("entrance"))
                 {
                     showNotification("Entered entrance", "Welcome to GC!");
                     inOrOut = "In";
@@ -95,18 +94,18 @@ public class MainActivity extends AppCompatActivity {
                     checkInTime.setText("Check in time: " + checkInOut);
                     insertToDatabase(user, checkInOut, inOrOut);
                 }*/
-            }
+
 
             @Override
             public void onExitedRegion(Region region) {
-                if (region.getIdentifier().equals("GC")) {
-                    showNotification("You have exited Greenwood Campbell.", "See you soon!");
-                    inOrOut = "Out";
-                    checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                    checkOutTime.setText("Check in time: " + checkInOut);
-                    insertToDatabase(user, checkInOut, inOrOut);
-                }
-                /*else if (region.getIdentifier().equals("entrance"))
+                showNotification("You have exited Greenwood Campbell.", "See you soon!");
+                inOrOut = "Out";
+                checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+                checkOutTime.setText("Check out time: " + checkInOut);
+                insertToDatabase(user, checkInOut, inOrOut);
+                mBluetoothAdapter.disable();
+            }
+            /*else if (region.getIdentifier().equals("entrance"))
                 {
                     showNotification("Exited entrance", "Goodbye!");
                     inOrOut = "Out";
@@ -114,8 +113,6 @@ public class MainActivity extends AppCompatActivity {
                     checkOutTime.setText("Check in time: " + checkInOut);
                     insertToDatabase(user, checkInOut, inOrOut);
                 }*/
-                mBluetoothAdapter.disable();
-            }
         });
 
         beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
