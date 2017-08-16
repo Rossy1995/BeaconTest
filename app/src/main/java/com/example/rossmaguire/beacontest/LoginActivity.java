@@ -41,12 +41,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private final static String TAG = LoginActivity.class.getSimpleName();
     private final static int REQUEST_ENABLE_BT = 1;
-    private EditText email, password;
+    private EditText username, password;
     private CheckBox saveLoginCheckBox;
     private Button login;
 
     private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    public static final String EMAIL_ADDRESS = "EMAILADDRESS";
+    public static final String USERNAME = "USERNAME";
 
     private String line;
     private String user, pass;
@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         login = findViewById(R.id.btnLogin);
         login.setOnClickListener(this);
-        email = findViewById(R.id.userName);
+        username = findViewById(R.id.userName);
         password = findViewById(R.id.passWord);
         saveLoginCheckBox = findViewById(R.id.saveLoginCheckBox);
         SharedPreferences loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
@@ -68,7 +68,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         Boolean saveLogin = loginPreferences.getBoolean("saveLogin", false);
         if (saveLogin) {
-            email.setText(loginPreferences.getString("user", ""));
+            username.setText(loginPreferences.getString("user", ""));
             password.setText(loginPreferences.getString("pass", ""));
             saveLoginCheckBox.setChecked(true);
         }
@@ -82,9 +82,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if (view == login)
         {
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(email.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(username.getWindowToken(), 0);
 
-            user = email.getText().toString();
+            user = username.getText().toString();
             pass = password.getText().toString();
 
             if (saveLoginCheckBox.isChecked()) {
@@ -164,14 +164,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void checkLogin() {
 
         // Get text from email and password field
-        user = email.getText().toString();
+        user = username.getText().toString();
         pass = password.getText().toString();
 
         // Initialize  AsyncLogin() class with email and password
         login(user, pass);
     }
 
-    private void login(final String email, String password) {
+    private void login(final String user, String password) {
 
         class LoginAsync extends AsyncTask<String, Void, String>{
 
@@ -230,7 +230,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     loadingDialog.dismiss();
                     if (s.equalsIgnoreCase("success")) {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        intent.putExtra(EMAIL_ADDRESS, email);
+                        intent.putExtra(USERNAME, user);
                         finish();
                         startActivity(intent);
                     } else {
@@ -245,7 +245,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
         LoginAsync la = new LoginAsync();
-        la.execute(email, password);
+        la.execute(user, password);
 
     }
 }

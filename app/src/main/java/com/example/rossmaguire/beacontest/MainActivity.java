@@ -33,43 +33,46 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.Date;
+import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
     private BeaconManager beaconManager;
     private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private TextView checkInTime;
-    private TextView checkOutTime;
-    private String checkInOut;
+    private TextView userName, checkInTime, checkOutTime;
     private InputStream is = null;
     private String result = null;
     private String line;
     private String inOrOut;
     private String user;
+    private long millis = System.currentTimeMillis();
+    private DateFormat dfDate = new SimpleDateFormat("yyyy-MM-dd");
+    private DateFormat dfTime = new SimpleDateFormat("HH:mm:ss");
+    private Time cTime;
+    private Date cDate;
+    private String reportDate;
+    private String reportTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextView userName = findViewById(R.id.userName);
-        TextView emailAddress = findViewById(R.id.email);
+        userName = findViewById(R.id.userName);
         checkInTime = findViewById(R.id.checkIn);
         checkOutTime = findViewById(R.id.checkOut);
         Intent intent = getIntent();
-        final String email = intent.getStringExtra(LoginActivity.EMAIL_ADDRESS);
-        int index = email.indexOf('@');
-
-        String userString = email.substring(0, index);
-        user = userString.substring(0, 1).toUpperCase() + userString.substring(1);
+        user = intent.getStringExtra(LoginActivity.USERNAME);
 
         userName.setText("Welcome " + user);
-        emailAddress.setText(email);
 
         final Region gc = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, null);
 
@@ -82,9 +85,12 @@ public class MainActivity extends AppCompatActivity {
             public void onEnteredRegion(Region region, List<Beacon> list) {
                 showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
                 inOrOut = "In";
-                checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                checkInTime.setText("Check in time: " + checkInOut);
-                insertToDatabase(user, checkInOut, inOrOut);
+                cTime = new Time(millis);
+                cDate = new Date(millis);
+                reportTime = dfTime.format(cTime);
+                reportDate = dfDate.format(cDate);
+                checkInTime.setText("Check in time: " + cTime);
+                insertToDatabase(user, reportTime, reportDate, inOrOut);
             }
             /*else if (region.getIdentifier().equals("entrance"))
                 {
@@ -100,9 +106,12 @@ public class MainActivity extends AppCompatActivity {
             public void onExitedRegion(Region region) {
                 showNotification("You have exited Greenwood Campbell.", "See you soon!");
                 inOrOut = "Out";
-                checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                checkOutTime.setText("Check out time: " + checkInOut);
-                insertToDatabase(user, checkInOut, inOrOut);
+                cTime = new Time(millis);
+                cDate = new Date(millis);
+                reportTime = dfTime.format(cTime);
+                reportDate = dfDate.format(cDate);
+                checkOutTime.setText("Check out time: " + cTime);
+                insertToDatabase(user, reportTime, reportDate, inOrOut);
                 mBluetoothAdapter.disable();
             }
             /*else if (region.getIdentifier().equals("entrance"))
@@ -142,17 +151,19 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(1, notification);
     }
 
-    private void insertToDatabase(final String user, final String checkInOut, final String inOrOut) {
+    private void insertToDatabase(final String user, final String reportTime, final String reportDate, final String inOrOut) {
         class SendPostReqAsyncTask extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
                 String user = params[0];
-                String checkInOut = params[1];
-                String inOrOut = params[2];
+                String reportTime = params[1];
+                String reportDate = params[2];
+                String inOrOut = params[3];
 
                 List<NameValuePair> nameValuePairs = new ArrayList<>();
                 nameValuePairs.add(new BasicNameValuePair("username", user));
-                nameValuePairs.add(new BasicNameValuePair("check_in_time", checkInOut));
+                nameValuePairs.add(new BasicNameValuePair("time", reportTime));
+                nameValuePairs.add(new BasicNameValuePair("date", reportDate));
                 nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
 
                 try {
@@ -184,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         SendPostReqAsyncTask sendPostReqAsyncTask = new SendPostReqAsyncTask();
-        sendPostReqAsyncTask.execute(user, checkInOut, inOrOut);
+        sendPostReqAsyncTask.execute(user, reportTime, reportDate, inOrOut);
     }
 
     @Override
