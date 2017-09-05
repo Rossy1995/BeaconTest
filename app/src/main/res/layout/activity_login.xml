@@ -1,71 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="16dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="16dp"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fitsSystemWindows="true"
+    android:background="@color/colorPrimaryDark"
     tools:context="com.example.rossmaguire.beacontest.LoginActivity">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        app:srcCompat="@mipmap/beacon_icon"
-        android:layout_above="@+id/linearLayout" />
-
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerVertical="true"
-        android:padding="10dp"
-        android:id="@+id/linearLayout"
-        android:weightSum="1">
+        android:paddingTop="56dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:id="@+id/linearLayout">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@mipmap/beacon_icon"
+            android:layout_marginBottom="24dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/enter_details"
-            android:textColor="#00aa55"
+            android:textColor="#000000"
             android:textSize="35sp"
             android:textStyle="bold"
             android:typeface="sans" />
-
-        <EditText
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:textColor="#ffffff"
-            android:textStyle="bold"
-            android:textColorHint="#ffffff"
-            android:background="#5d5d5d"
-            android:padding="10dp"
-            android:hint="@string/hint_username"
-            android:inputType="textNoSuggestions"
-            android:imeOptions="actionNext"
-            android:textSize="20sp"
-            android:id="@+id/userName" />
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <EditText
+                android:id="@+id/userName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
+                android:hint="@string/hint_username"
+                android:imeOptions="actionNext"/>
+        </android.support.design.widget.TextInputLayout>
 
-        <EditText
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+        <EditText
+            android:id="@+id/passWord"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="@string/hint_password"
-            android:textColor="#ffffff"
-            android:textColorHint="#ffffff"
-            android:textStyle="bold"
-            android:background="#5d5d5d"
-            android:padding="10dp"
             android:inputType="textPassword"
-            android:imeOptions="actionDone"
-            android:layout_marginTop="5dp"
-            android:id="@+id/passWord" />
-
+            android:imeOptions="actionDone"/>
+        </android.support.design.widget.TextInputLayout>
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -87,4 +81,4 @@
 
     </LinearLayout>
 
-</RelativeLayout>
+</ScrollView>

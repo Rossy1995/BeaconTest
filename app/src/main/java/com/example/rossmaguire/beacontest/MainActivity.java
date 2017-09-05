@@ -53,9 +53,9 @@ public class MainActivity extends AppCompatActivity {
     private String line;
     private String inOrOut;
     private String user;
-    private long millis = System.currentTimeMillis();
+    private long millis;
     private DateFormat dfDate = new SimpleDateFormat("yyyy-MM-dd");
-    private DateFormat dfTime = new SimpleDateFormat("HH:mm:ss");
+    private DateFormat dfTime = new SimpleDateFormat("HH:mm");
     private Time cTime;
     private Date cDate;
     private String reportDate;
@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
             public void onEnteredRegion(Region region, List<Beacon> list) {
                 showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
                 inOrOut = "In";
+                millis = System.currentTimeMillis();
                 cTime = new Time(millis);
                 cDate = new Date(millis);
                 reportTime = dfTime.format(cTime);
@@ -106,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
             public void onExitedRegion(Region region) {
                 showNotification("You have exited Greenwood Campbell.", "See you soon!");
                 inOrOut = "Out";
+                millis = System.currentTimeMillis();
                 cTime = new Time(millis);
                 cDate = new Date(millis);
                 reportTime = dfTime.format(cTime);
@@ -230,6 +232,10 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
+        }
+        else if (id == R.id.user_analytics){
+            Intent intent = new Intent(this, AnalyticsActivity.class);
+            this.startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
