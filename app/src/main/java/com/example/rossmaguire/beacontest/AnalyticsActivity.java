@@ -4,16 +4,23 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +44,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -160,20 +168,70 @@ public class AnalyticsActivity extends AppCompatActivity {
     }
 
     private void loadIntoListView(String json) throws JSONException {
+
         JSONArray jsonArray = new JSONArray(json);
 
-        String[] userTime = new String[jsonArray.length()];
+        int [] view = new int [] {R.id.time, R.id.in_or_out};
+
+        List<HashMap<String, String>> userTime = new ArrayList<>(jsonArray.length());
 
         for (int i = 0; i < jsonArray.length(); i++) {
 
+            HashMap item = new HashMap<String, String>();
             JSONObject obj = jsonArray.getJSONObject(i);
 
-            userTime[i] = obj.getString("username");
+            item.put("Time", obj.getString("cTime"));
+            item.put("In or Out", obj.getString("InOROut"));
+
+            userTime.add(item);
+
         }
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, userTime);
+        ListAdapter adapter = new SimpleAdapter(this, userTime, R.layout.item_layout, new String[] {"Time", "In or Out"}, new int[] {R.id.time, R.id.in_or_out});
 
-        dataList.setAdapter(arrayAdapter);
+        //ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, userTime);
+
+        dataList.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.log_out) {
+            AlertDialog.Builder mBuilder = new AlertDialog.Builder(AnalyticsActivity.this);
+            mBuilder.setTitle("Logout")
+                    .setMessage("Are you sure you want to logout?")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(AnalyticsActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+        else if (id == R.id.user_analytics){
+            Intent intent = new Intent(this, AnalyticsActivity.class);
+            this.startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
 
