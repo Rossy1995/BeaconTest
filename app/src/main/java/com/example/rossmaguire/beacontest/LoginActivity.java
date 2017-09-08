@@ -34,6 +34,8 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,7 +189,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             protected String doInBackground(String... params) {
                 String user = params[0];
-                String pass = params[1];
+                String pass = md5(params[1]);
+
+                System.out.println(pass);
 
                 InputStream is;
                 List<NameValuePair> nameValuePairs = new ArrayList<>();
@@ -247,5 +251,24 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         LoginAsync la = new LoginAsync();
         la.execute(user, password);
 
+    }
+
+    public String md5(String s) {
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            digest.update(s.getBytes());
+            byte messageDigest[] = digest.digest();
+
+            // Create Hex String
+            StringBuffer hexString = new StringBuffer();
+            for (int i=0; i<messageDigest.length; i++)
+                hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+            return hexString.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

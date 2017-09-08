@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private Date cDate;
     private String reportDate;
     private String reportTime;
+    private String userSubString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         user = intent.getStringExtra(LoginActivity.USERNAME);
 
-        userName.setText("Welcome " + user);
+        userSubString = user.split("@")[0];
+
+        userName.setText("Welcome " + userSubString);
 
         final Region gc = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, null);
 
@@ -93,15 +97,6 @@ public class MainActivity extends AppCompatActivity {
                 checkInTime.setText("Check in time: " + cTime);
                 insertToDatabase(user, reportTime, reportDate, inOrOut);
             }
-            /*else if (region.getIdentifier().equals("entrance"))
-                {
-                    showNotification("Entered entrance", "Welcome to GC!");
-                    inOrOut = "In";
-                    checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                    checkInTime.setText("Check in time: " + checkInOut);
-                    insertToDatabase(user, checkInOut, inOrOut);
-                }*/
-
 
             @Override
             public void onExitedRegion(Region region) {
@@ -116,14 +111,6 @@ public class MainActivity extends AppCompatActivity {
                 insertToDatabase(user, reportTime, reportDate, inOrOut);
                 mBluetoothAdapter.disable();
             }
-            /*else if (region.getIdentifier().equals("entrance"))
-                {
-                    showNotification("Exited entrance", "Goodbye!");
-                    inOrOut = "Out";
-                    checkInOut = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-                    checkOutTime.setText("Check in time: " + checkInOut);
-                    insertToDatabase(user, checkInOut, inOrOut);
-                }*/
         });
 
         beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
@@ -206,6 +193,10 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+    @Override
+    public void onBackPressed()
+    {}
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -50,11 +51,13 @@ import java.util.Map;
 
 public class AnalyticsActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private InputStream is = null;
+
     private ListView dataList;
 
     private Button datePicker;
     private Calendar calendar;
-    private String checkDate, userName, line;
+    private String username, result;
     private int year, month, day;
 
     @Override
@@ -68,12 +71,15 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
 
+        username = getIntent().getStringExtra(LoginActivity.USERNAME);
+
         dataList = findViewById(R.id.dataList);
         datePicker = findViewById(R.id.datePicker);
 
         datePicker.setOnClickListener(this);
-        
-        getJSON("http://ssmale.ddns.net/GC/checkUserTime.php");
+
+        this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
 
     @Override
@@ -81,26 +87,57 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
     {
         if (v == datePicker)
         {
-
             DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener()
             {
                 @Override
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
                 {
-                    datePicker.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                    result = year + "-" + (monthOfYear + 1) + "-" + dayOfMonth;
+                    datePicker.setText(result);
+                    getJSON(username, result);
                 }
             }, year, month, day);
             datePickerDialog.show();
         }
     }
 
-    private void getJSON(final String urlWebService) {
+    private void getJSON(final String user, String date) {
 
-        class GetJSON extends AsyncTask<Void, Void, String> {
+        class GetJSON extends AsyncTask<String, Void, String> {
 
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
+            protected String doInBackground(String... params) {
+                String user = params[0];
+                String date = params[1];
+
+                List<NameValuePair> nameValuePairs = new ArrayList<>();
+                nameValuePairs.add(new BasicNameValuePair("username", user));
+                nameValuePairs.add(new BasicNameValuePair("date", date));
+
+                try {
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpPost httpPost = new HttpPost("http://ssmale.ddns.net/GC/checkUserTime.php");
+                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                    HttpResponse response = httpClient.execute(httpPost);
+                    HttpEntity entity = response.getEntity();
+
+                    is = entity.getContent();
+
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
+                    StringBuilder sb = new StringBuilder();
+
+                    String json;
+
+                    while ((json = bufferedReader.readLine()) != null) {
+                        sb.append(json + "\n");
+                    }
+
+                    //finally returning the read string
+                    return sb.toString().trim();
+                } catch (Exception e) {
+                    return null;
+                }
+
             }
 
             @Override
@@ -113,41 +150,10 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
                 }
             }
 
-            @Override
-            protected String doInBackground(Void... voids) {
-                try {
-                    //creating a URL
-                    URL url = new URL(urlWebService);
-
-                    //Opening the URL using HttpURLConnection
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-                    //StringBuilder object to read the string from the service
-                    StringBuilder sb = new StringBuilder();
-
-                    //We will use a buffered reader to read the string from service
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-
-                    //A simple string to read values from each line
-                    String json;
-
-                    //reading until we don't find null
-                    while ((json = bufferedReader.readLine()) != null) {
-                        sb.append(json + "\n");
-                    }
-
-                    //finally returning the read string
-                    return sb.toString().trim();
-                } catch (Exception e) {
-                    return null;
-                }
-
-            }
         }
 
-        //creating asynctask object and executing it
         GetJSON getJSON = new GetJSON();
-        getJSON.execute();
+        getJSON.execute(username, date);
     }
 
     private void loadIntoListView(String json) throws JSONException {
@@ -172,8 +178,6 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
 
         ListAdapter adapter = new SimpleAdapter(this, userTime, R.layout.item_layout, new String[] {"Time", "In or Out"}, new int[] {R.id.time, R.id.in_or_out});
 
-        //ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, userTime);
-
         dataList.setAdapter(adapter);
     }
 
@@ -185,13 +189,22 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
+    public void onBackPressed()
+    {}
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.log_out) {
+        if (id == android.R.id.home)
+        {
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
+        else if (id == R.id.log_out) {
             AlertDialog.Builder mBuilder = new AlertDialog.Builder(AnalyticsActivity.this);
             mBuilder.setTitle("Logout")
                     .setMessage("Are you sure you want to logout?")
@@ -210,10 +223,7 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
         }
-        else if (id == R.id.user_analytics){
-            Intent intent = new Intent(this, AnalyticsActivity.class);
-            this.startActivity(intent);
-        }
+
         return super.onOptionsItemSelected(item);
     }
 }
