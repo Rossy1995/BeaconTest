@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 reportTime = dfTime.format(cTime);
                 reportDate = dfDate.format(cDate);
                 checkInTime.setText("Check in time: " + cTime);
-                insertToDatabase(user, reportTime, reportDate, inOrOut);
+                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
             }
 
             @Override
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                 reportTime = dfTime.format(cTime);
                 reportDate = dfDate.format(cDate);
                 checkOutTime.setText("Check out time: " + cTime);
-                insertToDatabase(user, reportTime, reportDate, inOrOut);
+                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
                 mBluetoothAdapter.disable();
             }
         });
@@ -139,9 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notification);
     }
-
-    private void insertToDatabase(final String user, final String reportTime, final String reportDate, final String inOrOut) {
-        class SendPostReqAsyncTask extends AsyncTask<String, Void, String> {
+    public class SendPostReqAsyncTask extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
                 String user = params[0];
@@ -157,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost("http://ssmale.ddns.net/GC/add_check_in_time.php");
+                    HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/add_check_in_time.php");
                     httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                     HttpResponse response = httpClient.execute(httpPost);
                     HttpEntity entity = response.getEntity();
@@ -183,9 +181,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
             }
         }
-        SendPostReqAsyncTask sendPostReqAsyncTask = new SendPostReqAsyncTask();
-        sendPostReqAsyncTask.execute(user, reportTime, reportDate, inOrOut);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

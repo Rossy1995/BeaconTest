@@ -79,7 +79,6 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
         datePicker.setOnClickListener(this);
 
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
     }
 
     @Override
@@ -93,7 +92,7 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
                 {
                     result = year + "-" + (monthOfYear + 1) + "-" + dayOfMonth;
-                    datePicker.setText(result);
+                    datePicker.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
                     getJSON(username, result);
                 }
             }, year, month, day);
@@ -116,7 +115,7 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
 
                 try {
                     HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost("http://ssmale.ddns.net/GC/checkUserTime.php");
+                    HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/checkUserTime.php");
                     httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                     HttpResponse response = httpClient.execute(httpPost);
                     HttpEntity entity = response.getEntity();

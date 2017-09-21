@@ -170,12 +170,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         pass = password.getText().toString();
 
         // Initialize  AsyncLogin() class with email and password
-        login(user, pass);
+        new LoginAsync().execute(user, pass);
     }
 
-    private void login(final String user, String password) {
-
-        class LoginAsync extends AsyncTask<String, Void, String>{
+    public class LoginAsync extends AsyncTask<String, Void, String>{
 
             private Dialog loadingDialog;
 
@@ -191,8 +189,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 String user = params[0];
                 String pass = md5(params[1]);
 
-                System.out.println(pass);
-
                 InputStream is;
                 List<NameValuePair> nameValuePairs = new ArrayList<>();
                 nameValuePairs.add(new BasicNameValuePair("username", user));
@@ -201,12 +197,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                 try{
                     HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost(
-                            "http://ssmale.ddns.net/GC/login.php");
+                    HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/login.php");
                     httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
                     HttpResponse response = httpClient.execute(httpPost);
-
                     HttpEntity entity = response.getEntity();
 
                     is = entity.getContent();
@@ -248,11 +241,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         }
 
-        LoginAsync la = new LoginAsync();
-        la.execute(user, password);
-
-    }
-
     public String md5(String s) {
         try {
             // Create MD5 Hash
@@ -262,7 +250,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             // Create Hex String
             StringBuffer hexString = new StringBuffer();
-            for (int i=0; i<messageDigest.length; i++)
+            for (int i= 0; i<messageDigest.length; i++)
                 hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
             return hexString.toString();
 
