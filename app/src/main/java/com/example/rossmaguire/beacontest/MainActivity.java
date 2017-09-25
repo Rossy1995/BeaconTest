@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private String reportDate;
     private String reportTime;
     private String userSubString;
+    private boolean userIn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,17 +86,26 @@ public class MainActivity extends AppCompatActivity {
         beaconManager.setBackgroundScanPeriod(25000, 30000);
 
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
+
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
-                inOrOut = "In";
-                millis = System.currentTimeMillis();
-                cTime = new Time(millis);
-                cDate = new Date(millis);
-                reportTime = dfTime.format(cTime);
-                reportDate = dfDate.format(cDate);
-                checkInTime.setText("Check in time: " + cTime);
-                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
+                if (!userIn) {
+                    userIn = true;
+                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                    inOrOut = "In";
+                    millis = System.currentTimeMillis();
+                    cTime = new Time(millis);
+                    cDate = new Date(millis);
+                    reportTime = dfTime.format(cTime);
+                    reportDate = dfDate.format(cDate);
+                    checkInTime.setText("Check in time: " + cTime);
+                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
+                }
+                else if (userIn)
+                {
+                    onExitedRegion(region);
+                }
+
             }
 
             @Override
@@ -109,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
                 reportDate = dfDate.format(cDate);
                 checkOutTime.setText("Check out time: " + cTime);
                 new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-                mBluetoothAdapter.disable();
             }
         });
 
@@ -139,48 +148,49 @@ public class MainActivity extends AppCompatActivity {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notification);
     }
+
     public class SendPostReqAsyncTask extends AsyncTask<String, Void, String> {
-            @Override
-            protected String doInBackground(String... params) {
-                String user = params[0];
-                String reportTime = params[1];
-                String reportDate = params[2];
-                String inOrOut = params[3];
+        @Override
+        protected String doInBackground(String... params) {
+            String user = params[0];
+            String reportTime = params[1];
+            String reportDate = params[2];
+            String inOrOut = params[3];
 
-                List<NameValuePair> nameValuePairs = new ArrayList<>();
-                nameValuePairs.add(new BasicNameValuePair("username", user));
-                nameValuePairs.add(new BasicNameValuePair("time", reportTime));
-                nameValuePairs.add(new BasicNameValuePair("date", reportDate));
-                nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            nameValuePairs.add(new BasicNameValuePair("username", user));
+            nameValuePairs.add(new BasicNameValuePair("time", reportTime));
+            nameValuePairs.add(new BasicNameValuePair("date", reportDate));
+            nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
 
-                try {
-                    HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/add_check_in_time.php");
-                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                    HttpResponse response = httpClient.execute(httpPost);
-                    HttpEntity entity = response.getEntity();
+            try {
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/add_check_in_time.php");
+                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                HttpResponse response = httpClient.execute(httpPost);
+                HttpEntity entity = response.getEntity();
 
-                    is = entity.getContent();
+                is = entity.getContent();
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
-                    StringBuilder sb = new StringBuilder();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
+                StringBuilder sb = new StringBuilder();
 
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    result = sb.toString();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
                 }
-
-                return result;
+                result = sb.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            @Override
-            protected void onPostExecute(String result) {
-                Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
-            }
+            return result;
         }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -190,8 +200,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed()
-    {}
+    public void onBackPressed() {
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -218,8 +228,7 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
-        }
-        else if (id == R.id.user_analytics){
+        } else if (id == R.id.user_analytics) {
             Intent intent = new Intent(this, AnalyticsActivity.class);
             this.startActivity(intent);
         }
