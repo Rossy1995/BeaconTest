@@ -9,4 +9,5 @@
     <string name="check_out_time">Check out time:</string>
     <string name="remember_me">Remember me</string>
     <string name="log_out">Log out</string>
+    <string name="title_activity_auto_login">AutoLoginActivity</string>
 </resources>
