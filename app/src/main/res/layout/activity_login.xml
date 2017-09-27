@@ -80,10 +80,4 @@
             android:textColor="#FFF" />
 
     </LinearLayout>
-
-    <com.liferay.mobile.screens.auth.login.LoginScreenLet
-        android:id="@+id/login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
 </ScrollView>

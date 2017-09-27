@@ -13,8 +13,10 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,9 +63,9 @@ public class MainActivity extends AppCompatActivity {
     private Date cDate;
     private String reportDate;
     private String reportTime;
-    private String userSubString;
     private Calendar cal = Calendar.getInstance();
-    private int hour = cal.get(Calendar.HOUR_OF_DAY);
+
+    public static final String CHECKTIME = "CHECKTIME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,9 +78,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         user = intent.getStringExtra(USERNAME);
 
-        userSubString = user.split("@")[0];
+        Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
+        startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+        startService(startIntent);
 
-        userName.setText("Welcome " + userSubString);
+        userName.setText("Welcome " + user);
 
         final Region gc = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, null);
 
@@ -89,20 +93,7 @@ public class MainActivity extends AppCompatActivity {
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                if (hour >= 13 && hour <= 14) {
-                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
-                    inOrOut = "Lunch";
-                    millis = System.currentTimeMillis();
-                    cTime = new Time(millis);
-                    cDate = new Date(millis);
-                    reportTime = dfTime.format(cTime);
-                    reportDate = dfDate.format(cDate);
-                    checkInTime.setText("Check in time: " + cTime);
-                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-                }
-                else
-                {
-                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                    //showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
                     inOrOut = "In";
                     millis = System.currentTimeMillis();
                     cTime = new Time(millis);
@@ -111,25 +102,11 @@ public class MainActivity extends AppCompatActivity {
                     reportDate = dfDate.format(cDate);
                     checkInTime.setText("Check in time: " + cTime);
                     new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-                }
-            }
 
+            }
             @Override
             public void onExitedRegion(Region region) {
-                if (hour >= 13 && hour <= 14) {
-                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
-                    inOrOut = "Lunch";
-                    millis = System.currentTimeMillis();
-                    cTime = new Time(millis);
-                    cDate = new Date(millis);
-                    reportTime = dfTime.format(cTime);
-                    reportDate = dfDate.format(cDate);
-                    checkInTime.setText("Check out time: " + cTime);
-                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-                }
-                else
-                {
-                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                    //showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
                     inOrOut = "Out";
                     millis = System.currentTimeMillis();
                     cTime = new Time(millis);
@@ -138,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
                     reportDate = dfDate.format(cDate);
                     checkInTime.setText("Check out time: " + cTime);
                     new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-                }
             }
         });
 
@@ -148,31 +124,12 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     beaconManager.startMonitoring(gc);
                 } catch (Exception e) {
-                    //somehow you cant monitore
                     e.printStackTrace();
                 }
             }
         });
     }
 
-    private void showNotification(String title, String message) {
-        Intent notifyIntent = new Intent(this, MainActivity.class);
-        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivities(this, 0,
-                new Intent[]{notifyIntent}, PendingIntent.FLAG_UPDATE_CURRENT);
-        @SuppressWarnings("deprecation") Notification notification = new Notification.Builder(this)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
-                .build();
-        //noinspection deprecation
-        notification.defaults |= Notification.DEFAULT_SOUND;
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
-    }
     public class SendPostReqAsyncTask extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
@@ -240,6 +197,9 @@ public class MainActivity extends AppCompatActivity {
                     .setMessage("Are you sure you want to logout?")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+                            Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
+                            stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+                            startService(stopIntent);
                             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                             startActivity(intent);
                             finish();
