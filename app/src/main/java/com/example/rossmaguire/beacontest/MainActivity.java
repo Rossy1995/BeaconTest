@@ -10,9 +10,9 @@ import android.content.Intent;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -41,13 +41,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.UUID;
+
+import static com.example.rossmaguire.beacontest.LoginActivity.USERNAME;
 
 public class MainActivity extends AppCompatActivity {
 
     private BeaconManager beaconManager;
-    private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private TextView userName, checkInTime, checkOutTime;
     private InputStream is = null;
     private String result = null;
@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private String reportDate;
     private String reportTime;
     private String userSubString;
+    private Calendar cal = Calendar.getInstance();
+    private int hour = cal.get(Calendar.HOUR_OF_DAY);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         checkInTime = findViewById(R.id.checkIn);
         checkOutTime = findViewById(R.id.checkOut);
         Intent intent = getIntent();
-        user = intent.getStringExtra(LoginActivity.USERNAME);
+        user = intent.getStringExtra(USERNAME);
 
         userSubString = user.split("@")[0];
 
@@ -87,36 +89,68 @@ public class MainActivity extends AppCompatActivity {
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
-                inOrOut = "In";
-                millis = System.currentTimeMillis();
-                cTime = new Time(millis);
-                cDate = new Date(millis);
-                reportTime = dfTime.format(cTime);
-                reportDate = dfDate.format(cDate);
-                checkInTime.setText("Check in time: " + cTime);
-                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
+                if (hour >= 13 && hour <= 14) {
+                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                    inOrOut = "Lunch";
+                    millis = System.currentTimeMillis();
+                    cTime = new Time(millis);
+                    cDate = new Date(millis);
+                    reportTime = dfTime.format(cTime);
+                    reportDate = dfDate.format(cDate);
+                    checkInTime.setText("Check in time: " + cTime);
+                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
+                }
+                else
+                {
+                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                    inOrOut = "In";
+                    millis = System.currentTimeMillis();
+                    cTime = new Time(millis);
+                    cDate = new Date(millis);
+                    reportTime = dfTime.format(cTime);
+                    reportDate = dfDate.format(cDate);
+                    checkInTime.setText("Check in time: " + cTime);
+                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
+                }
             }
 
             @Override
             public void onExitedRegion(Region region) {
-                showNotification("You have exited Greenwood Campbell.", "See you soon!");
-                inOrOut = "Out";
-                millis = System.currentTimeMillis();
-                cTime = new Time(millis);
-                cDate = new Date(millis);
-                reportTime = dfTime.format(cTime);
-                reportDate = dfDate.format(cDate);
-                checkOutTime.setText("Check out time: " + cTime);
-                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-                mBluetoothAdapter.disable();
+                if (hour >= 13 && hour <= 14) {
+                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                    inOrOut = "Lunch";
+                    millis = System.currentTimeMillis();
+                    cTime = new Time(millis);
+                    cDate = new Date(millis);
+                    reportTime = dfTime.format(cTime);
+                    reportDate = dfDate.format(cDate);
+                    checkInTime.setText("Check out time: " + cTime);
+                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
+                }
+                else
+                {
+                    showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                    inOrOut = "Out";
+                    millis = System.currentTimeMillis();
+                    cTime = new Time(millis);
+                    cDate = new Date(millis);
+                    reportTime = dfTime.format(cTime);
+                    reportDate = dfDate.format(cDate);
+                    checkInTime.setText("Check out time: " + cTime);
+                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
+                }
             }
         });
 
         beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
             @Override
             public void onServiceReady() {
-                beaconManager.startMonitoring(gc);
+                try {
+                    beaconManager.startMonitoring(gc);
+                } catch (Exception e) {
+                    //somehow you cant monitore
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -221,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else if (id == R.id.user_analytics){
             Intent intent = new Intent(this, AnalyticsActivity.class);
+            intent.putExtra(USERNAME, user);
             this.startActivity(intent);
         }
         return super.onOptionsItemSelected(item);

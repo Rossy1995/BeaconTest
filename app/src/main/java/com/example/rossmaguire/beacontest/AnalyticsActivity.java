@@ -49,6 +49,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.example.rossmaguire.beacontest.LoginActivity.USERNAME;
+
 public class AnalyticsActivity extends AppCompatActivity implements View.OnClickListener {
 
     private InputStream is = null;
@@ -71,7 +73,7 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        username = getIntent().getStringExtra(LoginActivity.USERNAME);
+        username = getIntent().getStringExtra(USERNAME);
 
         dataList = findViewById(R.id.dataList);
         datePicker = findViewById(R.id.datePicker);
@@ -93,16 +95,13 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
                 {
                     result = year + "-" + (monthOfYear + 1) + "-" + dayOfMonth;
                     datePicker.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
-                    getJSON(username, result);
+                    new GetJSON().execute(username, result);
                 }
             }, year, month, day);
             datePickerDialog.show();
         }
     }
-
-    private void getJSON(final String user, String date) {
-
-        class GetJSON extends AsyncTask<String, Void, String> {
+    public class GetJSON extends AsyncTask<String, Void, String> {
 
             @Override
             protected String doInBackground(String... params) {
@@ -130,7 +129,6 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
                     while ((json = bufferedReader.readLine()) != null) {
                         sb.append(json + "\n");
                     }
-
                     //finally returning the read string
                     return sb.toString().trim();
                 } catch (Exception e) {
@@ -150,10 +148,6 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
             }
 
         }
-
-        GetJSON getJSON = new GetJSON();
-        getJSON.execute(username, date);
-    }
 
     private void loadIntoListView(String json) throws JSONException {
 
