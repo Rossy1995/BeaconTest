@@ -24,7 +24,6 @@ public class ForegroundService extends Service{
         if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
             Log.i(LOG_TAG, "Received Start Foreground Intent ");
             showNotification();
-            Toast.makeText(this, "Service Started!", Toast.LENGTH_SHORT).show();
         } else if (intent.getAction().equals(Constants.ACTION.STOPFOREGROUND_ACTION)) {
             Log.i(LOG_TAG, "Received Stop Foreground Intent");
             stopForeground(true);
@@ -34,9 +33,9 @@ public class ForegroundService extends Service{
     }
 
     private void showNotification() {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
+        Intent notificationIntent = new Intent(this, LoginActivity.class);
         notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         notificationIntent.addCategory("android.intent.category.LAUNCHER");
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                 notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
