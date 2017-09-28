@@ -15,7 +15,8 @@
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/beacon_icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:persistent="true">
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
@@ -29,7 +30,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop" />
+            android:launchMode="singleInstance" />
         <activity
             android:name=".AnalyticsActivity"
             android:parentActivityName=".MainActivity">

@@ -63,9 +63,6 @@ public class MainActivity extends AppCompatActivity {
     private Date cDate;
     private String reportDate;
     private String reportTime;
-    private Calendar cal = Calendar.getInstance();
-
-    public static final String CHECKTIME = "CHECKTIME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,9 +75,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         user = intent.getStringExtra(USERNAME);
 
-        Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
-        startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
-        startService(startIntent);
+        Intent service = new Intent(MainActivity.this, ForegroundService.class);
+        service.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+        startService(service);
 
         userName.setText("Welcome " + user);
 
@@ -88,33 +85,33 @@ public class MainActivity extends AppCompatActivity {
 
         beaconManager = new BeaconManager(getApplicationContext());
 
-        beaconManager.setBackgroundScanPeriod(25000, 30000);
+        beaconManager.setBackgroundScanPeriod(5000, 300000);
 
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                    //showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
-                    inOrOut = "In";
-                    millis = System.currentTimeMillis();
-                    cTime = new Time(millis);
-                    cDate = new Date(millis);
-                    reportTime = dfTime.format(cTime);
-                    reportDate = dfDate.format(cDate);
-                    checkInTime.setText("Check in time: " + cTime);
-                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-
+                showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                inOrOut = "In";
+                millis = System.currentTimeMillis();
+                cTime = new Time(millis);
+                cDate = new Date(millis);
+                reportTime = dfTime.format(cTime);
+                reportDate = dfDate.format(cDate);
+                checkInTime.setText("Check in time: " + cTime);
+                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
             }
+
             @Override
             public void onExitedRegion(Region region) {
-                    //showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
-                    inOrOut = "Out";
-                    millis = System.currentTimeMillis();
-                    cTime = new Time(millis);
-                    cDate = new Date(millis);
-                    reportTime = dfTime.format(cTime);
-                    reportDate = dfDate.format(cDate);
-                    checkInTime.setText("Check out time: " + cTime);
-                    new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
+                showNotification("You have exited Greenwood Campbell.", "See you soon!");
+                inOrOut = "Out";
+                millis = System.currentTimeMillis();
+                cTime = new Time(millis);
+                cDate = new Date(millis);
+                reportTime = dfTime.format(cTime);
+                reportDate = dfDate.format(cDate);
+                checkInTime.setText("Check out time: " + cTime);
+                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
             }
         });
 
@@ -131,47 +128,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class SendPostReqAsyncTask extends AsyncTask<String, Void, String> {
-            @Override
-            protected String doInBackground(String... params) {
-                String user = params[0];
-                String reportTime = params[1];
-                String reportDate = params[2];
-                String inOrOut = params[3];
+        @Override
+        protected String doInBackground(String... params) {
+            String user = params[0];
+            String reportTime = params[1];
+            String reportDate = params[2];
+            String inOrOut = params[3];
 
-                List<NameValuePair> nameValuePairs = new ArrayList<>();
-                nameValuePairs.add(new BasicNameValuePair("username", user));
-                nameValuePairs.add(new BasicNameValuePair("time", reportTime));
-                nameValuePairs.add(new BasicNameValuePair("date", reportDate));
-                nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            nameValuePairs.add(new BasicNameValuePair("username", user));
+            nameValuePairs.add(new BasicNameValuePair("time", reportTime));
+            nameValuePairs.add(new BasicNameValuePair("date", reportDate));
+            nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
 
-                try {
-                    HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/add_check_in_time.php");
-                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                    HttpResponse response = httpClient.execute(httpPost);
-                    HttpEntity entity = response.getEntity();
+            try {
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/add_check_in_time.php");
+                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                HttpResponse response = httpClient.execute(httpPost);
+                HttpEntity entity = response.getEntity();
 
-                    is = entity.getContent();
+                is = entity.getContent();
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
-                    StringBuilder sb = new StringBuilder();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
+                StringBuilder sb = new StringBuilder();
 
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    result = sb.toString();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
                 }
-
-                return result;
+                result = sb.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            @Override
-            protected void onPostExecute(String result) {
-                Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
-            }
+            return result;
         }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -181,8 +178,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed()
-    {}
+    public void onBackPressed() {
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -212,12 +209,30 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
-        }
-        else if (id == R.id.user_analytics){
+        } else if (id == R.id.user_analytics) {
             Intent intent = new Intent(this, AnalyticsActivity.class);
             intent.putExtra(USERNAME, user);
             this.startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showNotification(String title, String message) {
+        Intent notifyIntent = new Intent(this, MainActivity.class);
+        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivities(this, 0,
+                new Intent[]{notifyIntent}, PendingIntent.FLAG_UPDATE_CURRENT);
+        @SuppressWarnings("deprecation") Notification notification = new Notification.Builder(this)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .build();
+        //noinspection deprecation
+        notification.defaults |= Notification.DEFAULT_SOUND;
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notification);
     }
 }

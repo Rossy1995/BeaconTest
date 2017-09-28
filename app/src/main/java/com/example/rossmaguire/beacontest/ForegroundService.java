@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 public class ForegroundService extends Service{
     private static final String LOG_TAG = "ForegroundService";
-    public static boolean IS_SERVICE_RUNNING = false;
 
     @Override
     public void onCreate() {
@@ -37,10 +36,10 @@ public class ForegroundService extends Service{
     private void showNotification() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notificationIntent.addCategory("android.intent.category.LAUNCHER");
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
+                notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Bitmap icon = BitmapFactory.decodeResource(getResources(),
                 R.mipmap.beacon_icon);
@@ -48,7 +47,7 @@ public class ForegroundService extends Service{
         Notification notification = new NotificationCompat.Builder(this)
                 .setContentTitle("GC iBeacon Agent")
                 .setTicker("GC iBeacon Agent")
-                .setContentText("...")
+                .setContentText("Making checking in easier!")
                 .setSmallIcon(R.mipmap.beacon_icon)
                 .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
                 .setContentIntent(pendingIntent)
