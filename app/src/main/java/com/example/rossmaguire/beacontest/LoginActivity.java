@@ -185,71 +185,71 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     public class LoginAsync extends AsyncTask<String, Void, String>{
 
-            private Dialog loadingDialog;
+        private Dialog loadingDialog;
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                //noinspection deprecation
-                loadingDialog = ProgressDialog.show(LoginActivity.this, "Please wait", "Loading...");
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //noinspection deprecation
+            loadingDialog = ProgressDialog.show(LoginActivity.this, "Please wait", "Loading...");
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            String user = params[0];
+            String pass = md5(params[1]);
+
+            InputStream is;
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            nameValuePairs.add(new BasicNameValuePair("username", user));
+            nameValuePairs.add(new BasicNameValuePair("password", pass));
+            String result = null;
+
+            try{
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/login.php");
+                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                HttpResponse response = httpClient.execute(httpPost);
+                HttpEntity entity = response.getEntity();
+
+                is = entity.getContent();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
+                StringBuilder sb = new StringBuilder();
+
+                while ((line = reader.readLine()) != null)
+                {
+                    sb.append(line + "\n");
+                }
+                result = sb.toString();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
 
-            @Override
-            protected String doInBackground(String... params) {
-                String user = params[0];
-                String pass = md5(params[1]);
+            return result;
+        }
 
-                InputStream is;
-                List<NameValuePair> nameValuePairs = new ArrayList<>();
-                nameValuePairs.add(new BasicNameValuePair("username", user));
-                nameValuePairs.add(new BasicNameValuePair("password", pass));
-                String result = null;
-
-                try{
-                    HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/login.php");
-                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                    HttpResponse response = httpClient.execute(httpPost);
-                    HttpEntity entity = response.getEntity();
-
-                    is = entity.getContent();
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
-                    StringBuilder sb = new StringBuilder();
-
-                    while ((line = reader.readLine()) != null)
-                    {
-                        sb.append(line + "\n");
-                    }
-                    result = sb.toString();
+        @Override
+        protected void onPostExecute(String result){
+            if (isInternetAvailable(LoginActivity.this)) {
+                String s = result.trim();
+                loadingDialog.dismiss();
+                if (s.equalsIgnoreCase("success")) {
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.putExtra(USERNAME, user);
+                    finish();
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Invalid User Name or Password", Toast.LENGTH_LONG).show();
                 }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                return result;
             }
-
-            @Override
-            protected void onPostExecute(String result){
-                if (isInternetAvailable(LoginActivity.this)) {
-                    String s = result.trim();
-                    loadingDialog.dismiss();
-                    if (s.equalsIgnoreCase("success")) {
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        intent.putExtra(USERNAME, user);
-                        finish();
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Invalid User Name or Password", Toast.LENGTH_LONG).show();
-                    }
-                }
-                else{
-                    loadingDialog.dismiss();
-                    Toast.makeText(getApplicationContext(), "No Internet Connection", Toast.LENGTH_SHORT).show();
-                }
+            else{
+                loadingDialog.dismiss();
+                Toast.makeText(getApplicationContext(), "No Internet Connection", Toast.LENGTH_SHORT).show();
             }
         }
+    }
 
     public String md5(String s) {
         try {
@@ -276,11 +276,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 checkEnableWiFi();
                 checkEnableBluetooth();
-            }else if (grantResults[0] == PackageManager.PERMISSION_DENIED){
-                    closeNow();
+            }
+            else if (grantResults[0] == PackageManager.PERMISSION_DENIED)
+            {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(LoginActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    //Show an explanation to the user *asynchronously*
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setCancelable(false);
+
+                    builder.setMessage("This permission is important to check into Greenwood Campbell.")
+                            .setTitle("Important permission required");
+                    builder.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            ActivityCompat.requestPermissions(LoginActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
+                        }
+                    });
+                    builder.setNegativeButton("Deny", new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int id){
+                            closeNow();
+                        }
+                    });
+                    builder.show();
                 }
+
             }
         }
+    }
 
 
     private void closeNow() {

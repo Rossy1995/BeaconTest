@@ -43,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import static com.example.rossmaguire.beacontest.LoginActivity.USERNAME;
@@ -68,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        dfTime.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         userName = findViewById(R.id.userName);
         checkInTime = findViewById(R.id.checkIn);
@@ -110,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 cDate = new Date(millis);
                 reportTime = dfTime.format(cTime);
                 reportDate = dfDate.format(cDate);
-                checkInTime.setText("Check out time: " + cTime);
+                checkOutTime.setText("Check out time: " + cTime);
                 new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
             }
         });

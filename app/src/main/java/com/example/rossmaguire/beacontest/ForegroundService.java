@@ -33,7 +33,7 @@ public class ForegroundService extends Service{
     }
 
     private void showNotification() {
-        Intent notificationIntent = new Intent(this, LoginActivity.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         notificationIntent.addCategory("android.intent.category.LAUNCHER");
