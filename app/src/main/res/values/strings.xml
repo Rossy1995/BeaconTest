@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GC Attendance Tracker</string>
+    <string name="app_name">GC iBeacon Agent</string>
     <string name="btn_login">Login</string>
     <string name="hint_username">Username</string>
     <string name="hint_password">Password</string>

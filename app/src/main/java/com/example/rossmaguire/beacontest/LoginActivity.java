@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         username = findViewById(R.id.userName);
         password = findViewById(R.id.passWord);
         saveLoginCheckBox = findViewById(R.id.saveLoginCheckBox);
+
         SharedPreferences loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
 
@@ -85,7 +86,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         if (ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(LoginActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
-
+        }
+        else if (ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            checkEnableWiFi();
+            checkEnableBluetooth();
         }
     }
 
@@ -108,7 +112,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 loginPrefsEditor.clear();
                 loginPrefsEditor.commit();
             }
-
             checkLogin();
         }
     }
@@ -273,11 +276,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == LOCATION) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                checkEnableWiFi();
-                checkEnableBluetooth();
-            }
-            else if (grantResults[0] == PackageManager.PERMISSION_DENIED)
+            if (grantResults[0] == PackageManager.PERMISSION_DENIED)
             {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(LoginActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     //Show an explanation to the user *asynchronously*
@@ -298,7 +297,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     });
                     builder.show();
                 }
-
             }
         }
     }

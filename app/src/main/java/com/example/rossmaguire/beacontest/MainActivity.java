@@ -8,9 +8,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dfTime.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //dfTime.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         userName = findViewById(R.id.userName);
         checkInTime = findViewById(R.id.checkIn);
@@ -80,97 +82,11 @@ public class MainActivity extends AppCompatActivity {
 
         Intent service = new Intent(MainActivity.this, ForegroundService.class);
         service.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+        service.putExtra("username", user);
         startService(service);
 
         userName.setText("Welcome " + user);
 
-        final Region gc = new Region("GC", UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D"), 55141, null);
-
-        beaconManager = new BeaconManager(getApplicationContext());
-
-        beaconManager.setBackgroundScanPeriod(5000, 300000);
-
-        beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
-            @Override
-            public void onEnteredRegion(Region region, List<Beacon> list) {
-                showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
-                inOrOut = "In";
-                millis = System.currentTimeMillis();
-                cTime = new Time(millis);
-                cDate = new Date(millis);
-                reportTime = dfTime.format(cTime);
-                reportDate = dfDate.format(cDate);
-                checkInTime.setText("Check in time: " + cTime);
-                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-            }
-
-            @Override
-            public void onExitedRegion(Region region) {
-                showNotification("You have exited Greenwood Campbell.", "See you soon!");
-                inOrOut = "Out";
-                millis = System.currentTimeMillis();
-                cTime = new Time(millis);
-                cDate = new Date(millis);
-                reportTime = dfTime.format(cTime);
-                reportDate = dfDate.format(cDate);
-                checkOutTime.setText("Check out time: " + cTime);
-                new SendPostReqAsyncTask().execute(user, reportTime, reportDate, inOrOut);
-            }
-        });
-
-        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
-            @Override
-            public void onServiceReady() {
-                try {
-                    beaconManager.startMonitoring(gc);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    public class SendPostReqAsyncTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... params) {
-            String user = params[0];
-            String reportTime = params[1];
-            String reportDate = params[2];
-            String inOrOut = params[3];
-
-            List<NameValuePair> nameValuePairs = new ArrayList<>();
-            nameValuePairs.add(new BasicNameValuePair("username", user));
-            nameValuePairs.add(new BasicNameValuePair("time", reportTime));
-            nameValuePairs.add(new BasicNameValuePair("date", reportDate));
-            nameValuePairs.add(new BasicNameValuePair("in_or_out", inOrOut));
-
-            try {
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/add_check_in_time.php");
-                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                HttpResponse response = httpClient.execute(httpPost);
-                HttpEntity entity = response.getEntity();
-
-                is = entity.getContent();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
-                StringBuilder sb = new StringBuilder();
-
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-                result = sb.toString();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            Toast.makeText(getApplicationContext(), "Insert was successful!", Toast.LENGTH_LONG).show();
-        }
     }
 
     @Override
@@ -238,4 +154,5 @@ public class MainActivity extends AppCompatActivity {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notification);
     }
+
 }
