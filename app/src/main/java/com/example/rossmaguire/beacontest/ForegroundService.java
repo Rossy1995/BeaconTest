@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -66,9 +67,9 @@ public class ForegroundService extends Service{
                 inOrOut = "In";
                 millis = System.currentTimeMillis();
                 cTime = new Time(millis);
-                Intent intent = new Intent(ForegroundService.this, MainActivity.class);
+                Intent intent = new Intent("usertimes");
                 intent.putExtra("checkIn", cTime);
-                sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
                 new SendPostReqAsyncTask().execute(user, inOrOut);
             }
 
@@ -78,8 +79,9 @@ public class ForegroundService extends Service{
                 inOrOut = "Out";
                 millis = System.currentTimeMillis();
                 cTime = new Time(millis);
-                Intent intent = new Intent(ForegroundService.this, MainActivity.class);
+                Intent intent = new Intent("usertimes");
                 intent.putExtra("checkOut", cTime);
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
                 new SendPostReqAsyncTask().execute(user, inOrOut);
             }
         });
