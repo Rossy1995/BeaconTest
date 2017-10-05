@@ -11,7 +11,6 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -31,7 +30,6 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,14 +39,13 @@ import static com.example.rossmaguire.beacontest.LoginActivity.USERNAME;
 public class ForegroundService extends Service{
 
     private static final String LOG_TAG = "ForegroundService";
+    private static final String BEACON_TAG = "Beacon Monitoring";
     private String user;
     private BeaconManager beaconManager;
     private InputStream is = null;
     private String result = null;
     private String line;
     private String inOrOut;
-    private long millis;
-    private Time cTime;
 
     @Override
     public void onCreate() {
@@ -58,18 +55,14 @@ public class ForegroundService extends Service{
 
         beaconManager = new BeaconManager(getApplicationContext());
 
-        beaconManager.setBackgroundScanPeriod(25000, 30000);
+        beaconManager.setBackgroundScanPeriod(5000, 300000);
 
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
                 showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
                 inOrOut = "In";
-                millis = System.currentTimeMillis();
-                cTime = new Time(millis);
-                Intent intent = new Intent("usertimes");
-                intent.putExtra("checkIn", cTime);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                Log.i(BEACON_TAG, "Beacon has found a beacon!");
                 new SendPostReqAsyncTask().execute(user, inOrOut);
             }
 
@@ -77,11 +70,7 @@ public class ForegroundService extends Service{
             public void onExitedRegion(Region region) {
                 showNotification("You have exited Greenwood Campbell.", "See you soon!");
                 inOrOut = "Out";
-                millis = System.currentTimeMillis();
-                cTime = new Time(millis);
-                Intent intent = new Intent("usertimes");
-                intent.putExtra("checkOut", cTime);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                Log.i(BEACON_TAG, "You have left the beacon region!");
                 new SendPostReqAsyncTask().execute(user, inOrOut);
             }
         });
