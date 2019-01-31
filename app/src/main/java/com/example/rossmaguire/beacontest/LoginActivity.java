@@ -210,7 +210,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             try{
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/login.php");
+                HttpPost httpPost = new HttpPost("");
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 HttpResponse response = httpClient.execute(httpPost);
                 HttpEntity entity = response.getEntity();
@@ -283,7 +283,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setCancelable(false);
 
-                    builder.setMessage("This permission is important to check into Greenwood Campbell.")
+                    builder.setMessage("This permission is important to check into...")
                             .setTitle("Important permission required");
                     builder.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {

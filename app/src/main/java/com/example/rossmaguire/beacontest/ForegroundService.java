@@ -60,7 +60,7 @@ public class ForegroundService extends Service{
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                showNotification("You have entered Greenwood Campbell.", "Welcome to GC!");
+                showNotification("You have entered...", "");
                 inOrOut = "In";
                 Log.i(BEACON_TAG, "Beacon has found a beacon!");
                 new SendPostReqAsyncTask().execute(user, inOrOut);
@@ -99,7 +99,7 @@ public class ForegroundService extends Service{
 
             try {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/add_check_in_time_test.php");
+                HttpPost httpPost = new HttpPost("");
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 HttpResponse response = httpClient.execute(httpPost);
                 HttpEntity entity = response.getEntity();

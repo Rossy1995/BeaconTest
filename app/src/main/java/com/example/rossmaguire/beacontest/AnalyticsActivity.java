@@ -114,7 +114,7 @@ public class AnalyticsActivity extends AppCompatActivity implements View.OnClick
 
                 try {
                     HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost("http://gc_reporting.sagat.dnsalias.com/checkUserTime.php");
+                    HttpPost httpPost = new HttpPost("");
                     httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                     HttpResponse response = httpClient.execute(httpPost);
                     HttpEntity entity = response.getEntity();
